@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #d9e6ff;
+  --color-brand-200: #bcd3ff;
+  --color-brand-300: #8eb6ff;
+  --color-brand-400: #598fff;
+  --color-brand-500: #3366ff;
+  --color-brand-600: #1f45f5;
+  --color-brand-700: #1a34e1;
+  --color-brand-800: #1c2eb6;
+  --color-brand-900: #1c2e8f;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/*
+ * Complexity expressions such as "O(n log n)" or "O(log n) space" must never
+ * break across lines. Applied via the <Complexity> component so every call
+ * site — cards, tables, chart labels, legends, stats — behaves identically.
+ */
+.complexity {
+  white-space: nowrap;
+  display: inline-block;
+  min-width: max-content;
+  word-break: keep-all;
+  overflow-wrap: normal;
+  flex-shrink: 0;
+  font-variant-ligatures: none;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+}
+
+/* Range slider styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: color-mix(in oklab, currentColor 18%, transparent);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--color-brand-500);
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.3);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 2px solid white;
+  border-radius: 9999px;
+  background: var(--color-brand-500);
+  cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(148 163 184 / 0.5);
+  border-radius: 9999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
