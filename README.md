@@ -91,10 +91,10 @@ are disabled until you add the keys.
 The schema lives in `supabase/migrations/`. Apply them in order once (Dashboard
 → SQL Editor → paste + run each file):
 
-1. `20240101000000_create_profiles.sql`
-2. `20240201000000_learning_progress.sql`
-3. `20240301000000_quiz_attempts_and_identity.sql`
-4. `20240302000000_harden_quiz_progress.sql`
+1. `01_create_profiles.sql`
+2. `02_learning_progress.sql`
+3. `03_quiz_attempts_and_identity.sql`
+4. `04_harden_quiz_progress.sql`
 
 Alternatively use the Supabase CLI: `supabase link --project-ref <ref>` then
 `supabase db push`.
