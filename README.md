@@ -42,9 +42,13 @@ comparison/swap counters, guided lesson levels, quizzes and gamified progress.
 | Auth | Supabase Auth (email/password) |
 | Database | Supabase PostgreSQL |
 | Security | Row Level Security + hardened `SECURITY DEFINER` RPCs |
+| Backend | Java 21 + Spring Boot 3 (sorting engine + quiz scoring) |
 
-No separate backend server — the sorting engine runs entirely in the browser and
-Supabase is the data layer.
+The sorting engine and quiz scoring run on a Java Spring Boot backend. When that
+server is reachable the frontend uses it (see the **Java engine** badge on the
+visualizer); when it is not — for example on the deployed Vercel site — the app
+silently falls back to an identical in-browser TypeScript engine. Supabase
+remains the data layer for auth and progress in both cases.
 
 ## Project structure
 
@@ -55,36 +59,91 @@ src/
 ├── context/          AuthContext, ProgressContext, ThemeContext
 ├── data/             levels.ts (10 levels + quizzes), badges.ts
 ├── hooks/            useSortPlayer, usePrefersReducedMotion, useQuizAttempts
-├── lib/              supabase.ts (client), quizData.ts
+├── lib/              supabase.ts (client), api.ts (Java backend client), quizData.ts
 ├── pages/            Landing, Visualizer, Compare, Levels, Progress, Dashboard, ...
 └── utils/            cn, array, displayName, quizAnswers
+backend/
+├── pom.xml           Maven build (Spring Boot 3.3, Java 21)
+└── src/main/java/com/sortcraft/backend/
+    ├── controller/   REST endpoints (sort, algorithms, levels, quiz, health)
+    ├── engine/       Java port of the sorting algorithms + step recorder
+    ├── service/      QuizScorer (server-side answer checking)
+    ├── data/         AlgorithmCatalog, LevelCatalog (10 levels, 35 questions)
+    ├── model/        DTOs and enums
+    └── config/       CORS + global error handling
 supabase/
 └── migrations/       SQL schema — apply these to your Supabase project
 ```
 
 ## Getting started (local development)
 
-Requirements: Node.js 18+
+Requirements: Node.js 18+, Java 21 (JDK) and Maven 3.9+
 
 ```bash
+# 1. Frontend
 npm install
 cp .env.example .env   # then fill in your Supabase values
 npm run dev            # opens http://localhost:5173
+
+# 2. Java backend (optional but recommended — powers the visualizer + quizzes)
+cd backend
+mvn spring-boot:run    # listens on http://localhost:8080
+cd ..
 ```
+
+With both running, open http://localhost:5173 and confirm the visualizer shows
+the **Java engine** badge. Stop the backend and reload to see the app fall back
+to the browser engine without breaking anything.
 
 `.env.example` contains:
 
 ```
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
+VITE_JAVA_BACKEND_URL=http://localhost:8080
 ```
 
-Get these from your Supabase project (Project Settings → API). Only the public
-**anon** key ever ships to the browser — never put a service-role key in the
-frontend.
+Get the Supabase values from your project (Project Settings → API). Only the
+public **anon** key ever ships to the browser — never put a service-role key in
+the frontend. `VITE_JAVA_BACKEND_URL` is optional; it defaults to
+`http://localhost:8080`.
 
-The app runs without Supabase configured, but auth and progress-syncing features
-are disabled until you add the keys.
+The app runs without Supabase configured or without the Java backend, but auth /
+progress-syncing and the Java engine are disabled until they are available.
+
+## Java backend
+
+A Spring Boot 3 (Java 21) application that owns the *authoritative* sorting
+engine and quiz answer key. The frontend client lives in `src/lib/api.ts`.
+
+| Endpoint | Method | Description |
+| --- | --- | --- |
+| `/api/health` | GET | Lightweight liveness probe the frontend uses to detect the backend |
+| `/api/sort` | POST | Compute `SortStep[]` for an array + algorithm + order |
+| `/api/algorithms` | GET | Metadata (pseudocode, Java code, complexity) for all 7 algorithms |
+| `/api/levels` | GET | All 10 levels with lessons and quizzes |
+| `/api/levels/{id}` | GET | A single level |
+| `/api/quiz/score` | POST | Server-side quiz scoring with the authoritative answer key |
+
+The step output is byte-for-byte shaped like the in-browser engine's
+`SortStep`, so the frontend treats both sources identically. Quiz scoring (score,
+pass/fail, XP) mirrors the same rules as the Supabase `record_quiz_attempt()` RPC.
+
+Example — bubble sort steps:
+
+```bash
+curl -X POST http://localhost:8080/api/sort \
+  -H "Content-Type: application/json" \
+  -d '{"array":[5,3,8,1,2],"algorithm":"bubble","order":"asc"}'
+```
+
+Example — score a level quiz:
+
+```bash
+curl -X POST http://localhost:8080/api/quiz/score \
+  -H "Content-Type: application/json" \
+  -d '{"levelId":1,"answers":[{"questionId":"l1q1","selected":1},{"questionId":"l1q2","selected":2},{"questionId":"l1q3","selected":1}]}'
+```
 
 ## Database setup
 

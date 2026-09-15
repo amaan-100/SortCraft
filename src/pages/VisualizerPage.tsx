@@ -35,14 +35,31 @@ export default function VisualizerPage() {
     totalSteps,
     goToStep,
     order,
+    engine,
   } = player;
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-7xl px-4 py-8 sm:px-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          {algorithm.name} visualizer
-        </h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            {algorithm.name} visualizer
+          </h1>
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+              engine === "java"
+                ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700/60 dark:bg-emerald-900/30 dark:text-emerald-300"
+                : "border-slate-300 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300"
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                engine === "java" ? "bg-emerald-500" : "bg-slate-400"
+              }`}
+            />
+            {engine === "java" ? "Java engine" : "Browser engine"}
+          </span>
+        </div>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           {algorithm.tagline} Sorting in{" "}
           <span className="font-medium text-slate-800 dark:text-slate-200">

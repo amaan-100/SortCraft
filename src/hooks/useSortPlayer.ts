@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAlgorithm } from "@/algorithms";
 import type { AlgorithmId, SortOrder, SortStep } from "@/algorithms/types";
 import { randomArray } from "@/utils/array";
+import { detectJavaBackend, fetchSortSteps } from "@/lib/api";
+
+export type EngineSource = "java" | "browser";
 
 export interface SortPlayerState {
   algorithmId: AlgorithmId;
@@ -27,15 +30,42 @@ export function useSortPlayer(initialSize = 24, initialAlgorithm: AlgorithmId = 
   const [stepIndex, setStepIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(60);
+  const [javaSteps, setJavaSteps] = useState<SortStep[] | null>(null);
+  const [engine, setEngine] = useState<EngineSource>("browser");
 
   const timerRef = useRef<number | null>(null);
 
   const algorithm = useMemo(() => getAlgorithm(algorithmId), [algorithmId]);
 
-  const steps = useMemo(
+  const localSteps = useMemo(
     () => algorithm.generateSteps(baseArray, order),
     [algorithm, baseArray, order]
   );
+
+  /**
+   * Sorting runs on the Java backend when it is reachable and falls back to
+   * the identical in-browser engine otherwise. A config change re-fetches.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    setJavaSteps(null);
+    setEngine("browser");
+
+    detectJavaBackend().then((available) => {
+      if (!available || cancelled) return;
+      fetchSortSteps(baseArray, algorithmId, order).then((remote) => {
+        if (cancelled || !remote || remote.length === 0) return;
+        setJavaSteps(remote);
+        setEngine("java");
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [baseArray, algorithmId, order, localSteps.length]);
+
+  const steps = javaSteps ?? localSteps;
 
   const totalSteps = steps.length;
 
@@ -169,6 +199,7 @@ export function useSortPlayer(initialSize = 24, initialAlgorithm: AlgorithmId = 
     isPlaying,
     isFinished,
     speed,
+    engine,
     // setters / controls
     setSpeed,
     changeAlgorithm,
