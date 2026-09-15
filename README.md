@@ -71,6 +71,7 @@ backend/
     ├── data/         AlgorithmCatalog, LevelCatalog (10 levels, 35 questions)
     ├── model/        DTOs and enums
     └── config/       CORS + global error handling
+render.yaml           Render Blueprint (free Docker web service)
 supabase/
 └── migrations/       SQL schema — apply these to your Supabase project
 ```
@@ -174,6 +175,37 @@ XP are always computed inside PostgreSQL — never trusted from the client.
    the redirect allow-list (for email-confirmation links).
 
 Routing uses `HashRouter`, so no rewrite rules are required.
+
+### Deploying the Java backend (Render, free)
+
+The backend is hosted on Render as a Docker web service on the **free** plan
+(512 MB; it sleeps after ~15 min of inactivity and wakes automatically on the
+next request). The config ships in this repo as `render.yaml`.
+
+1. Push this repo to GitHub (already done).
+2. On [render.com](https://render.com), sign up with GitHub **→ New → Blueprint**.
+3. Pick the **SortCraft** repo. Render reads `render.yaml` and provisions a
+   `sortcraft-backend` web service automatically.
+4. Click **Apply** / **Create Resources**. The first deploy builds the Docker
+   image (a few minutes) and starts on a URL like
+   `https://sortcraft-backend.onrender.com`.
+5. Verify: open `https://sortcraft-backend.onrender.com/api/health` — you should
+   see `{"status":"ok",...}`.
+
+To make the deployed frontend use the Java engine:
+
+1. On Vercel → your project → **Settings → Environment Variables**, add
+   `VITE_JAVA_BACKEND_URL` = `https://sortcraft-backend.onrender.com` for
+   Production, Preview and Development.
+2. Redeploy the Vercel project. Open the visualizer — the badge should now read
+   **Java engine**.
+
+**Cold-start note:** on the free tier the backend sleeps after ~15 min idle.
+The frontend re-probes the backend every 30 s, so on first load the badge may
+briefly show **Browser engine** and flip to **Java engine** within ~30–60 s once
+the instance wakes. Everything keeps working meanwhile via the in-browser
+engine. The app works exactly the same with the backend down — the Java server
+is a progressive enhancement, never a requirement.
 
 ## Roadmap
 

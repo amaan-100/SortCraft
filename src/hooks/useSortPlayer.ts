@@ -32,8 +32,11 @@ export function useSortPlayer(initialSize = 24, initialAlgorithm: AlgorithmId = 
   const [speed, setSpeed] = useState(60);
   const [javaSteps, setJavaSteps] = useState<SortStep[] | null>(null);
   const [engine, setEngine] = useState<EngineSource>("browser");
+  const [probeTick, setProbeTick] = useState(0);
 
   const timerRef = useRef<number | null>(null);
+  /** Config for which Java steps are already loaded, to avoid refetch churn. */
+  const javaConfigRef = useRef<string | null>(null);
 
   const algorithm = useMemo(() => getAlgorithm(algorithmId), [algorithmId]);
 
@@ -44,10 +47,23 @@ export function useSortPlayer(initialSize = 24, initialAlgorithm: AlgorithmId = 
 
   /**
    * Sorting runs on the Java backend when it is reachable and falls back to
-   * the identical in-browser engine otherwise. A config change re-fetches.
+   * the identical in-browser engine otherwise. Free tiers sleep after idle, so
+   * the backend is re-probed every 30s: once a cold-started instance wakes,
+   * the visualizer upgrades to the Java engine automatically.
    */
   useEffect(() => {
+    const interval = window.setInterval(() => setProbeTick((t) => t + 1), 30000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
+    const signature = `${algorithmId}|${order}|${baseArray.join(",")}`;
+
+    if (javaConfigRef.current === signature) {
+      return;
+    }
+
     setJavaSteps(null);
     setEngine("browser");
 
@@ -55,6 +71,7 @@ export function useSortPlayer(initialSize = 24, initialAlgorithm: AlgorithmId = 
       if (!available || cancelled) return;
       fetchSortSteps(baseArray, algorithmId, order).then((remote) => {
         if (cancelled || !remote || remote.length === 0) return;
+        javaConfigRef.current = signature;
         setJavaSteps(remote);
         setEngine("java");
       });
@@ -63,7 +80,7 @@ export function useSortPlayer(initialSize = 24, initialAlgorithm: AlgorithmId = 
     return () => {
       cancelled = true;
     };
-  }, [baseArray, algorithmId, order, localSteps.length]);
+  }, [baseArray, algorithmId, order, probeTick]);
 
   const steps = javaSteps ?? localSteps;
 

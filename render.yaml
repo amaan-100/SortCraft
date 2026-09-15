@@ -1,0 +1,13 @@
+# Render Blueprint — deploys the SortCraft Spring Boot backend.
+# Create it via Render Dashboard -> New -> Blueprint and select this repo.
+services:
+  - type: web
+    name: sortcraft-backend
+    runtime: docker
+    plan: free # 512 MB, full-time until 15 min idle — then sleeps and auto-wakes on request
+    region: oregon
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    branch: main

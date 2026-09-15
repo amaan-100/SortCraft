@@ -9,39 +9,59 @@ import type { AlgorithmId, SortOrder, SortStep } from "@/algorithms/types";
  * When it is not reachable (for example the deployed Vercel site), every
  * call site falls back to the identical in-browser TypeScript engine, so the
  * app keeps working with zero network dependency.
+ *
+ * Free hosts (Render, Fly.io) sleep after idle periods and cold-start slowly.
+ * The probe therefore retries after a short cooldown instead of caching
+ * "down" forever, so the Java engine is picked up automatically once the
+ * instance wakes.
  */
 
 const JAVA_BACKEND_URL = (
   import.meta.env.VITE_JAVA_BACKEND_URL as string | undefined
 )?.replace(/\/+$/, "") ?? "http://localhost:8080";
 
+/** Give the probe a chance to cover a waking instance. */
+const PROBE_TIMEOUT_MS = 2500;
+/** How long to wait before probing again after a failure. */
+const RETRY_COOLDOWN_MS = 15000;
+
 type BackendStatus = "unknown" | "up" | "down";
 
 let status: BackendStatus = "unknown";
+let downSince = 0;
 let healthCheck: Promise<boolean> | null = null;
 
-/** Singleton health probe with a short timeout; repeated callers share one check. */
+async function probe(): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
+    const res = await fetch(`${JAVA_BACKEND_URL}/api/health`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error(`health ${res.status}`);
+    const data = (await res.json()) as { status?: string };
+    status = data.status === "ok" ? "up" : "down";
+  } catch {
+    status = "down";
+  }
+  if (status === "down") downSince = Date.now();
+  return status === "up";
+}
+
+/**
+ * Resolves true when the backend is (confirmed) reachable. Probes on demand:
+ * immediately on the first call, then again once the retry cooldown has
+ * elapsed after a failure. Concurrent callers share a single in-flight probe.
+ */
 export function detectJavaBackend(): Promise<boolean> {
-  if (status !== "unknown") return Promise.resolve(status === "up");
+  if (status === "up") return Promise.resolve(true);
+  const shouldProbe = status === "unknown" || Date.now() - downSince >= RETRY_COOLDOWN_MS;
+  if (!shouldProbe) return Promise.resolve(false);
   if (healthCheck) return healthCheck;
-
-  healthCheck = (async () => {
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 2500);
-      const res = await fetch(`${JAVA_BACKEND_URL}/api/health`, {
-        signal: controller.signal,
-      });
-      clearTimeout(timer);
-      if (!res.ok) throw new Error(`health ${res.status}`);
-      const data = (await res.json()) as { status?: string };
-      status = data.status === "ok" ? "up" : "down";
-    } catch {
-      status = "down";
-    }
-    return status === "up";
-  })();
-
+  healthCheck = probe().finally(() => {
+    healthCheck = null;
+  });
   return healthCheck;
 }
 
@@ -54,14 +74,20 @@ export function getJavaBackendUrl(): string {
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${JAVA_BACKEND_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(10000),
-  });
-  if (!res.ok) throw new Error(`${path} -> ${res.status}`);
-  return (await res.json()) as T;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const res = await fetch(`${JAVA_BACKEND_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`${path} -> ${res.status}`);
+    return (await res.json()) as T;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /**
@@ -78,6 +104,7 @@ export async function fetchSortSteps(
     return await postJson<SortStep[]>("/api/sort", { array, algorithm, order });
   } catch {
     status = "down";
+    downSince = Date.now();
     return null;
   }
 }
@@ -109,6 +136,7 @@ export async function fetchQuizScore(
     return await postJson<JavaQuizScore>("/api/quiz/score", { levelId, answers });
   } catch {
     status = "down";
+    downSince = Date.now();
     return null;
   }
 }
@@ -124,6 +152,7 @@ export async function fetchLevels(): Promise<Level[] | null> {
     return (await res.json()) as Level[];
   } catch {
     status = "down";
+    downSince = Date.now();
     return null;
   }
 }
