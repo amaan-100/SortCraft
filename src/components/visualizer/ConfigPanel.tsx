@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowDownNarrowWide, ArrowUpNarrowWide, Settings2, Shuffle } from "lucide-react";
+import { ArrowDownNarrowWide, ArrowUpNarrowWide, Settings2 } from "lucide-react";
 import { algorithmList } from "@/algorithms";
 import type { AlgorithmId, SortOrder } from "@/algorithms/types";
 import { Button } from "@/components/ui/Button";
@@ -8,7 +8,15 @@ import { Complexity } from "@/components/ui/Complexity";
 import { Slider } from "@/components/ui/Slider";
 import type { SortPlayer } from "@/hooks/useSortPlayer";
 import { speedToDelay } from "@/hooks/useSortPlayer";
-import { MAX_SIZE, MIN_SIZE, formatArray, parseCustomArray } from "@/utils/array";
+import {
+  ARRAY_PRESETS,
+  MAX_SIZE,
+  MIN_SIZE,
+  formatArray,
+  parseCustomArray,
+  presetArray,
+  type ArrayPresetId,
+} from "@/utils/array";
 import { cn } from "@/utils/cn";
 
 export function ConfigPanel({ player }: { player: SortPlayer }) {
@@ -18,13 +26,13 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
     order,
     changeOrder,
     baseArray,
-    shuffle,
     applyCustomArray,
     speed,
     setSpeed,
   } = player;
 
   const [size, setSize] = useState(baseArray.length);
+  const [preset, setPreset] = useState<ArrayPresetId>("random");
   const [customText, setCustomText] = useState(() => formatArray(baseArray));
   const [customError, setCustomError] = useState<string | null>(null);
   const [customSuccess, setCustomSuccess] = useState<string | null>(null);
@@ -36,7 +44,12 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
 
   const handleSize = (value: number) => {
     setSize(value);
-    shuffle(value);
+    applyCustomArray(presetArray(value, preset));
+  };
+
+  const handlePreset = (id: ArrayPresetId) => {
+    setPreset(id);
+    applyCustomArray(presetArray(size, id));
   };
 
   const handleApplyCustom = () => {
@@ -98,7 +111,7 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
             value={size}
             onChange={handleSize}
             valueLabel={`${size} bars`}
-            hint="Changing the size generates a new random array."
+            hint="Changing the size generates a new array with the active shape."
           />
           <Slider
             label="Animation speed"
@@ -134,11 +147,32 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
               </button>
             ))}
           </div>
+        </div>
 
-          <Button variant="outline" onClick={() => shuffle()}>
-            <Shuffle className="h-4 w-4" />
-            Random array
-          </Button>
+        <div>
+          <p className="mb-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+            Input shape
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {ARRAY_PRESETS.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => handlePreset(p.id)}
+                aria-pressed={preset === p.id}
+                className={cn(
+                  "min-h-[30px] rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  preset === p.id
+                    ? "border-brand-500 bg-brand-600 text-white"
+                    : "border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+            {ARRAY_PRESETS.find((p) => p.id === preset)?.description}
+          </p>
         </div>
 
         <div>
