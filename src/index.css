@@ -3,23 +3,71 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --color-brand-50: #eef4ff;
-  --color-brand-100: #d9e6ff;
-  --color-brand-200: #bcd3ff;
-  --color-brand-300: #8eb6ff;
-  --color-brand-400: #598fff;
-  --color-brand-500: #3366ff;
-  --color-brand-600: #1f45f5;
-  --color-brand-700: #1a34e1;
-  --color-brand-800: #1c2eb6;
-  --color-brand-900: #1c2e8f;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Accent — a restrained teal "signal", tuned to glow on near-black. */
+  --color-brand-50: #f0fdfa;
+  --color-brand-100: #ccfbf1;
+  --color-brand-200: #99f6e4;
+  --color-brand-300: #5eead4;
+  --color-brand-400: #2dd4bf;
+  --color-brand-500: #14b8a6;
+  --color-brand-600: #0d9488;
+  --color-brand-700: #0f766e;
+  --color-brand-800: #115e59;
+  --color-brand-900: #134e4a;
+
+  /* Semantic surfaces (light + dark) resolved at runtime via --* below. */
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-ink: var(--fg-secondary);
+  --color-muted: var(--fg-muted);
+}
+
+/*
+ * Technical chrome — near-black canvas with hairline separations in dark;
+ * cool white with steel text in light. Utilities like `bg-canvas`,
+ * `border-line`, `text-muted` resolve through these variables, so individual
+ * components never hard-code a theme.
+ */
+:root {
+  --canvas: #f7f7f8;
+  --surface: #ffffff;
+  --surface-2: #f0f1f3;
+  --surface-3: #e5e7ea;
+  --line: #e4e6e9;
+  --line-strong: #d3d6db;
+  --fg: #181a1f;
+  --fg-secondary: #565a63;
+  --fg-muted: #878b94;
+}
+
+.dark {
+  --canvas: #0a0b0e;
+  --surface: #131417;
+  --surface-2: #1a1c21;
+  --surface-3: #24262c;
+  --line: #23252b;
+  --line-strong: #363940;
+  --fg: #eceef1;
+  --fg-secondary: #a7abb4;
+  --fg-muted: #686c75;
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-canvas text-fg antialiased;
+  font-feature-settings: "cv11", "ss01";
 }
 
 /*
@@ -37,36 +85,43 @@ html {
   font-variant-ligatures: none;
 }
 
-body {
-  @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+/* Small-caps eyebrow used at the top of page headers and sections. */
+.overline {
+  @apply text-[11px] font-medium uppercase tracking-[0.14em];
 }
 
-/* Range slider styling */
+::selection {
+  background: color-mix(in oklab, var(--color-brand-500) 32%, transparent);
+}
+
+/* Range slider — thin technical rail with a crisp ringed thumb. */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  height: 6px;
+  height: 2px;
   border-radius: 9999px;
-  background: color-mix(in oklab, currentColor 18%, transparent);
+  background: color-mix(in oklab, currentColor 22%, transparent);
   outline: none;
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
+  margin-top: -5.5px;
   border-radius: 9999px;
-  background: var(--color-brand-500);
-  border: 2px solid white;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.3);
+  background: var(--color-fg);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-line-strong);
   cursor: pointer;
 }
 input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border: 2px solid white;
+  width: 13px;
+  height: 13px;
   border-radius: 9999px;
-  background: var(--color-brand-500);
+  background: var(--color-fg);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-line-strong);
   cursor: pointer;
 }
 
@@ -74,9 +129,24 @@ input[type="range"]::-moz-range-thumb {
   width: 10px;
   height: 10px;
 }
+::-webkit-scrollbar-track {
+  background: transparent;
+}
 ::-webkit-scrollbar-thumb {
-  background: rgb(148 163 184 / 0.5);
+  background: var(--line-strong);
   border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.rail-connector::after {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 40px;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
 }
 
 @media (prefers-reduced-motion: reduce) {

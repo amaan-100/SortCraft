@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { CheckCircle2, Clock, Lock, PlayCircle, Sparkles } from "lucide-react";
+import { CheckCircle2, ChevronRight, Clock, Lock, Sparkles } from "lucide-react";
 import { levels } from "@/data/levels";
 import { algorithms } from "@/algorithms";
-import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Panel } from "@/components/ui/Panel";
 import { XpBar } from "@/components/progress/XpBar";
 import { useProgress } from "@/context/ProgressContext";
 import { cn } from "@/utils/cn";
@@ -20,77 +21,84 @@ export default function LevelsPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Learning path</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <header className="mb-8">
+        <p className="overline text-muted">Learn</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+          Learning path
+        </h1>
+        <p className="mt-1.5 text-sm text-ink">
           Ten levels, from “what is sorting?” to choosing the right algorithm. Pass a
           level’s quiz to unlock the next one.
         </p>
       </header>
 
       {syncError && (
-        <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-500/10 dark:text-amber-200">
+        <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-300">
           {syncError}
         </p>
       )}
 
-      <Card className="mb-6 p-4">
+      <Panel dots={false} title="PROGRESS" className="mb-8" bodyClassName="p-4">
         <XpBar
           totalXp={totalXp}
           xpAvailable={xpAvailable}
           completed={completedLevelIds.length}
           totalLevels={levels.length}
         />
-      </Card>
+      </Panel>
 
-      <ol className="space-y-3">
-        {levels.map((level) => {
+      {/* The path — nodes on a vertical rail that stops at the last node. */}
+      <ol className="relative">
+        {levels.map((level, i) => {
           const unlocked = isLevelUnlocked(level.id);
           const completed = isLevelCompleted(level.id);
           const record = records[level.id];
           const algo = level.algorithm ? algorithms[level.algorithm] : null;
 
+          const node = (
+            <span
+              aria-hidden
+              className={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-mono text-xs",
+                completed
+                  ? "border-brand-500 bg-brand-500 text-[#04201d]"
+                  : unlocked
+                    ? "border-brand-500 bg-surface text-brand-600 shadow-[0_0_0_4px_color-mix(in_oklab,var(--color-brand-500)_12%,transparent)] dark:text-brand-400"
+                    : "border-dashed border-line-strong bg-surface text-muted"
+              )}
+            >
+              {completed ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : unlocked ? (
+                level.id
+              ) : (
+                <Lock className="h-3.5 w-3.5" />
+              )}
+            </span>
+          );
+
           const body = (
             <div
               className={cn(
-                "flex flex-col gap-3 rounded-xl border p-4 transition-colors sm:flex-row sm:items-center",
-                unlocked
-                  ? "border-slate-200 bg-white hover:border-brand-400 dark:border-slate-800 dark:bg-slate-900"
-                  : "border-dashed border-slate-300 bg-slate-50/60 dark:border-slate-700 dark:bg-slate-900/40"
+                "flex min-w-0 flex-col gap-3 rounded-lg border p-4 transition-colors sm:flex-row sm:items-center",
+                unlocked && !completed
+                  ? "border-line bg-surface hover:border-line-strong"
+                  : completed
+                    ? "border-brand-500/40 bg-surface"
+                    : "border-dashed border-line bg-surface-2/40"
               )}
             >
-              <span
-                className={cn(
-                  "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-sm font-bold",
-                  completed
-                    ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300"
-                    : unlocked
-                      ? "bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300"
-                      : "bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600"
-                )}
-              >
-                {completed ? (
-                  <CheckCircle2 className="h-5 w-5" />
-                ) : unlocked ? (
-                  level.id
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
-              </span>
-
               <div className="min-w-0 flex-1">
                 <h2
                   className={cn(
                     "text-sm font-semibold",
-                    !unlocked && "text-slate-500 dark:text-slate-500"
+                    !unlocked && "text-ink"
                   )}
                 >
                   Level {level.id} · {level.title}
                 </h2>
-                <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
-                  {level.subtitle}
-                </p>
-                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500 dark:text-slate-500">
+                <p className="mt-0.5 text-xs text-ink">{level.subtitle}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-muted">
                   <span className="inline-flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {level.minutes} min
@@ -100,40 +108,42 @@ export default function LevelsPage() {
                     {level.xpReward} XP
                   </span>
                   <span>{level.quiz.length} questions</span>
-                  {algo && <span>Visualizer: {algo.name}</span>}
+                  {algo && <span>visualizer: {algo.name}</span>}
                   {record && (
-                    <span className="font-mono text-emerald-600 dark:text-emerald-400">
+                    <span className="text-emerald-600 dark:text-emerald-400">
                       best {record.bestScore}/{record.questions}
                     </span>
                   )}
                 </div>
               </div>
 
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1.5 self-start rounded-lg px-3 py-2 text-xs font-medium sm:self-center",
-                  unlocked
-                    ? "bg-brand-600 text-white"
-                    : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
-                )}
-              >
-                {unlocked ? (
-                  <>
-                    <PlayCircle className="h-4 w-4" />
-                    {completed ? "Review" : "Start"}
-                  </>
-                ) : (
-                  <>
-                    <Lock className="h-3.5 w-3.5" />
-                    Locked
-                  </>
-                )}
-              </span>
+              {unlocked ? (
+                <Button variant={completed ? "outline" : "secondary"} size="sm">
+                  {completed ? "Review" : "Start"}
+                  {completed ? (
+                    <CheckCircle2 className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Button>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 self-start rounded-md border border-line bg-surface-2 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-muted sm:self-center">
+                  <Lock className="h-3 w-3" />
+                  Locked
+                </span>
+              )}
             </div>
           );
 
           return (
-            <li key={level.id}>
+            <li
+              key={level.id}
+              className={cn(
+                "relative pb-5 pl-[56px]",
+                i < levels.length - 1 && "rail-connector"
+              )}
+            >
+              <span className="absolute left-0 top-1">{node}</span>
               {unlocked ? (
                 <Link to={`/levels/${level.id}`} className="block">
                   {body}

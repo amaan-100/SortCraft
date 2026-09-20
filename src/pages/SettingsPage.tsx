@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { CheckCircle2, Loader2, Mail, Save, User2 } from "lucide-react";
+import { CheckCircle2, Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Card, CardHeader } from "@/components/ui/Card";
+import { Panel } from "@/components/ui/Panel";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/context/AuthContext";
 import { DISPLAY_NAME_MAX, validateDisplayName } from "@/utils/displayName";
@@ -42,23 +42,19 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Settings</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Settings</h1>
+        <p className="mt-1 text-sm text-ink">
           Manage the name other parts of SortCraft use for you.
         </p>
       </header>
 
       {profileError && (
-        <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-500/10 dark:text-amber-200">
+        <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-600 dark:text-amber-300">
           {profileError}
         </p>
       )}
 
-      <Card className="mb-6">
-        <CardHeader
-          title="Profile"
-          icon={<User2 className="h-4 w-4 text-brand-600 dark:text-brand-400" />}
-        />
+      <Panel dots={false} title="PROFILE" className="mb-6">
         <form onSubmit={handleSubmit} className="space-y-4 p-4" noValidate>
           <Input
             label="Display name"
@@ -76,7 +72,7 @@ export default function SettingsPage() {
           />
 
           {success && (
-            <div className="flex items-start gap-2 rounded-lg bg-emerald-50 p-3 text-xs text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+            <div className="flex items-start gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 p-3 text-xs text-emerald-600 dark:text-emerald-300">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{success}</span>
             </div>
@@ -98,41 +94,37 @@ export default function SettingsPage() {
             )}
           </div>
         </form>
-      </Card>
+      </Panel>
 
-      <Card>
-        <CardHeader
-          title="Account"
-          icon={<Mail className="h-4 w-4 text-brand-600 dark:text-brand-400" />}
-        />
-        <dl className="divide-y divide-slate-200 text-sm dark:divide-slate-800">
+      <Panel dots={false} title="ACCOUNT">
+        <dl className="divide-y divide-line text-sm">
           <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-            <dt className="text-slate-600 dark:text-slate-400">Email</dt>
-            <dd className="min-w-0 truncate font-mono text-xs text-slate-800 dark:text-slate-200">
+            <dt className="text-muted">Email</dt>
+            <dd className="min-w-0 truncate font-mono text-xs text-fg">
               {user?.email ?? "—"}
             </dd>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-            <dt className="text-slate-600 dark:text-slate-400">Username</dt>
-            <dd className="min-w-0 truncate font-mono text-xs text-slate-800 dark:text-slate-200">
+            <dt className="text-muted">Username</dt>
+            <dd className="min-w-0 truncate font-mono text-xs text-fg">
               {profile?.username ? `@${profile.username}` : "—"}
             </dd>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-            <dt className="text-slate-600 dark:text-slate-400">Member since</dt>
-            <dd className="font-mono text-xs text-slate-800 dark:text-slate-200">
+            <dt className="text-muted">Member since</dt>
+            <dd className="font-mono text-xs text-fg">
               {profile?.created_at
                 ? new Date(profile.created_at).toLocaleDateString()
                 : "—"}
             </dd>
           </div>
         </dl>
-        <p className="border-t border-slate-200 px-4 py-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-500">
+        <p className="border-t border-line px-4 py-3 text-xs text-muted">
           Your email address is managed by Supabase Auth and is never shown in the
           header. Passwords are handled entirely by Supabase — SortCraft never stores
           them.
         </p>
-      </Card>
+      </Panel>
     </div>
   );
 }

@@ -42,18 +42,18 @@ export function BadgeGrid({ earned }: { earned: string[] }) {
           <div
             key={badge.id}
             className={cn(
-              "rounded-xl border p-4 transition-colors",
+              "rounded-md border p-4 transition-colors",
               unlocked
-                ? "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
-                : "border-dashed border-slate-300 bg-slate-50/60 dark:border-slate-700 dark:bg-slate-900/40"
+                ? "border-line bg-surface"
+                : "border-dashed border-line-strong bg-surface-2/40"
             )}
           >
             <span
               className={cn(
-                "mb-3 flex h-10 w-10 items-center justify-center rounded-lg",
+                "mb-3 flex h-10 w-10 items-center justify-center rounded-md",
                 unlocked
                   ? tones[badge.tone]
-                  : "bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600"
+                  : "bg-surface-2 text-muted"
               )}
             >
               {unlocked ? <Icon className="h-5 w-5" /> : <Lock className="h-4 w-4" />}
@@ -61,12 +61,12 @@ export function BadgeGrid({ earned }: { earned: string[] }) {
             <h3
               className={cn(
                 "text-sm font-semibold",
-                !unlocked && "text-slate-500 dark:text-slate-500"
+                !unlocked && "text-muted"
               )}
             >
               {badge.name}
             </h3>
-            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+            <p className="mt-1 text-xs text-ink">
               {unlocked ? badge.description : badge.hint}
             </p>
           </div>

@@ -30,14 +30,14 @@ export function Slider({
   const inputId = id ?? `slider-${label.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <div className={cn("w-full", className)}>
-      <div className="mb-1.5 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between">
         <label
           htmlFor={inputId}
-          className="text-xs font-medium text-slate-600 dark:text-slate-400"
+          className="text-xs font-medium text-ink"
         >
           {label}
         </label>
-        <span className="font-mono text-xs text-slate-800 dark:text-slate-200">
+        <span className="font-mono text-xs tabular-nums text-fg">
           {valueLabel ?? value}
         </span>
       </div>
@@ -50,11 +50,9 @@ export function Slider({
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full text-slate-400 disabled:opacity-50"
+        className="w-full text-fg disabled:opacity-50"
       />
-      {hint && (
-        <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-500">{hint}</p>
-      )}
+      {hint && <p className="mt-1.5 text-[11px] text-muted">{hint}</p>}
     </div>
   );
 }

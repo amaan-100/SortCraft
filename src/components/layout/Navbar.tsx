@@ -33,18 +33,18 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
+    <header className="sticky top-0 z-40 border-b border-line bg-canvas/80 backdrop-blur supports-[backdrop-filter]:bg-canvas/70">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-3 sm:px-6">
-        <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white">
-            <BarChart3 className="h-5 w-5" />
+        <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2.5">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-500 text-[#04201d]">
+            <BarChart3 className="h-[18px] w-[18px]" strokeWidth={2.2} />
           </span>
-          <span className="truncate text-lg font-bold tracking-tight">
+          <span className="truncate text-[17px] font-semibold tracking-tight">
             Sort<span className="text-brand-600 dark:text-brand-400">Craft</span>
           </span>
         </Link>
 
-        <nav className="hidden min-w-0 items-center gap-1 lg:flex">
+        <nav className="hidden min-w-0 items-center gap-0.5 lg:flex">
           {publicLinks.map((link) => (
             <NavLink
               key={link.to}
@@ -52,10 +52,10 @@ export function Navbar() {
               end={link.end}
               className={({ isActive }) =>
                 cn(
-                  "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                    ? "bg-surface-2 text-fg"
+                    : "text-ink hover:bg-surface-2 hover:text-fg"
                 )
               }
             >
@@ -64,7 +64,7 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
           <Button
             variant="ghost"
             size="icon"
@@ -73,18 +73,18 @@ export function Navbar() {
             title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           >
             {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
+              <Sun className="h-[18px] w-[18px]" />
             ) : (
-              <Moon className="h-5 w-5" />
+              <Moon className="h-[18px] w-[18px]" />
             )}
           </Button>
 
           {/* Desktop auth area. While `loading` is true we render a neutral
               skeleton so logged-out buttons never flash for a signed-in user. */}
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="hidden items-center gap-1.5 md:flex">
             {loading ? (
               <div
-                className="h-9 w-32 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800"
+                className="h-9 w-32 animate-pulse rounded-md bg-surface-2"
                 aria-label="Checking your session"
                 role="status"
               />
@@ -113,13 +113,13 @@ export function Navbar() {
             aria-expanded={open}
             onClick={() => setOpen((o) => !o)}
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {open ? <X className="h-[18px] w-[18px]" /> : <Menu className="h-[18px] w-[18px]" />}
           </Button>
         </div>
       </div>
 
       {open && (
-        <div className="border-t border-slate-200 bg-white px-3 py-3 lg:hidden dark:border-slate-800 dark:bg-slate-950">
+        <div className="border-t border-line bg-canvas px-3 py-3 lg:hidden">
           <nav className="flex flex-col gap-1">
             {publicLinks.map((link) => (
               <NavLink
@@ -128,10 +128,10 @@ export function Navbar() {
                 end={link.end}
                 className={({ isActive }) =>
                   cn(
-                    "rounded-lg px-3 py-2.5 text-sm font-medium",
+                    "rounded-md px-3 py-2.5 text-sm font-medium",
                     isActive
-                      ? "bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300"
-                      : "text-slate-600 dark:text-slate-400"
+                      ? "bg-surface-2 text-fg"
+                      : "text-ink"
                   )
                 }
               >
@@ -139,39 +139,39 @@ export function Navbar() {
               </NavLink>
             ))}
 
-            <div className="mt-2 border-t border-slate-200 pt-3 dark:border-slate-800">
+            <div className="mt-2 border-t border-line pt-3">
               {loading ? (
                 <div
-                  className="h-10 w-full animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800"
+                  className="h-10 w-full animate-pulse rounded-md bg-surface-2"
                   role="status"
                   aria-label="Checking your session"
                 />
               ) : user ? (
                 <>
                   <div className="mb-2 flex items-center gap-2.5 px-1">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-xs font-bold text-white">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-500 text-xs font-bold text-white">
                       {initialsOf(displayName)}
                     </span>
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-semibold">
                         {displayName}
                       </span>
-                      <span className="block text-xs text-slate-500">Signed in</span>
+                      <span className="block text-xs text-muted">Signed in</span>
                     </span>
                   </div>
                   {accountLinks.map(({ to, label, Icon }) => (
                     <NavLink
                       key={to}
                       to={to}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300"
+                      className="flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm text-ink"
                     >
-                      <Icon className="h-4 w-4 text-slate-400" />
+                      <Icon className="h-4 w-4 text-muted" />
                       {label}
                     </NavLink>
                   ))}
                   <button
                     onClick={handleSignOut}
-                    className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-rose-600 dark:text-rose-400"
+                    className="mt-1 flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-sm text-rose-500"
                   >
                     <LogOut className="h-4 w-4" />
                     Log out
@@ -186,7 +186,7 @@ export function Navbar() {
                       </Button>
                     </Link>
                     <Link to="/signup" className="min-w-0 flex-1">
-                      <Button variant="secondary" className="w-full justify-center">
+                      <Button className="w-full justify-center">
                         Sign up
                       </Button>
                     </Link>

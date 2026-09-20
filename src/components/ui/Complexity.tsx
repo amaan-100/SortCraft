@@ -36,8 +36,7 @@ export function Complexity({
       className={cn(
         "complexity whitespace-nowrap min-w-max shrink-0 font-mono font-semibold tabular-nums",
         sizes[size],
-        tone === "chip" &&
-          "rounded-md bg-slate-100 px-1.5 py-0.5 dark:bg-slate-800/70",
+        tone === "chip" && "rounded-md bg-surface-2 px-1.5 py-0.5",
         className
       )}
     >

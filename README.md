@@ -58,7 +58,7 @@ src/
 ├── components/       UI: auth, layout, quiz, visualizer, ui primitives
 ├── context/          AuthContext, ProgressContext, ThemeContext
 ├── data/             levels.ts (10 levels + quizzes), badges.ts
-├── hooks/            useSortPlayer, usePrefersReducedMotion, useQuizAttempts
+├── hooks/            useSortPlayer, usePrefersReducedMotion, useQuizAttempts, useCountUp
 ├── lib/              supabase.ts (client), api.ts (Java backend client), quizData.ts
 ├── pages/            Landing, Visualizer, Compare, Levels, Progress, Dashboard, ...
 └── utils/            cn, array, displayName, quizAnswers
@@ -201,8 +201,8 @@ To make the deployed frontend use the Java engine:
    **Java engine**.
 
 **Cold-start note:** on the free tier the backend sleeps after ~15 min idle.
-The frontend re-probes the backend every 30 s, so on first load the badge may
-briefly show **Browser engine** and flip to **Java engine** within ~30–60 s once
+The frontend re-probes the backend every 15 s, so on first load the badge may
+briefly show **Browser engine** and flip to **Java engine** within ~15–45 s once
 the instance wakes. Everything keeps working meanwhile via the in-browser
 engine. The app works exactly the same with the backend down — the Java server
 is a progressive enhancement, never a requirement.

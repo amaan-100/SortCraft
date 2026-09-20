@@ -14,7 +14,7 @@ export function Input({ label, error, hint, className, id, ...props }: InputProp
       {label && (
         <label
           htmlFor={inputId}
-          className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400"
+          className="mb-1.5 block text-xs font-medium text-ink"
         >
           {label}
         </label>
@@ -22,20 +22,17 @@ export function Input({ label, error, hint, className, id, ...props }: InputProp
       <input
         id={inputId}
         className={cn(
-          "w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400",
-          "focus:outline-none focus:ring-2 focus:ring-brand-500/50",
-          "dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-600",
+          "w-full rounded-md border bg-surface px-3 py-2 text-sm text-fg placeholder:text-muted",
+          "focus:outline-none focus:ring-2 focus:ring-brand-500/40",
           error
-            ? "border-rose-400 dark:border-rose-500"
-            : "border-slate-300 dark:border-slate-700",
+            ? "border-rose-400"
+            : "border-line-strong hover:border-fg/30 focus:border-brand-500",
           className
         )}
         {...props}
       />
-      {error && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{error}</p>}
-      {!error && hint && (
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">{hint}</p>
-      )}
+      {error && <p className="mt-1 text-xs text-rose-500">{error}</p>}
+      {!error && hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
     </div>
   );
 }

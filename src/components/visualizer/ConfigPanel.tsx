@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { ArrowDownNarrowWide, ArrowUpNarrowWide, Settings2 } from "lucide-react";
+import { ArrowDownNarrowWide, ArrowUpNarrowWide } from "lucide-react";
 import { algorithmList } from "@/algorithms";
 import type { AlgorithmId, SortOrder } from "@/algorithms/types";
 import { Button } from "@/components/ui/Button";
-import { Card, CardHeader } from "@/components/ui/Card";
+import { Panel } from "@/components/ui/Panel";
 import { Complexity } from "@/components/ui/Complexity";
 import { Slider } from "@/components/ui/Slider";
 import type { SortPlayer } from "@/hooks/useSortPlayer";
@@ -65,32 +65,25 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
   };
 
   return (
-    <Card>
-      <CardHeader
-        title="Configuration"
-        icon={<Settings2 className="h-4 w-4 text-brand-600 dark:text-brand-400" />}
-      />
-      <div className="space-y-5 p-4">
+    <Panel dots={false} title="CONFIGURATION" bodyClassName="space-y-5 p-4">
         <div>
-          <p className="mb-2 text-xs font-medium text-slate-600 dark:text-slate-400">
-            Algorithm
-          </p>
+          <p className="overline mb-2 text-muted">Algorithm</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {algorithmList.map((algo) => (
               <button
                 key={algo.id}
                 onClick={() => changeAlgorithm(algo.id as AlgorithmId)}
                 className={cn(
-                  "min-w-0 rounded-lg border px-3 py-2 text-left transition-colors",
+                  "min-w-0 rounded-md border px-3 py-2 text-left transition-colors",
                   algorithmId === algo.id
-                    ? "border-brand-500 bg-brand-50 dark:bg-brand-500/10"
-                    : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/60"
+                    ? "border-brand-500 bg-brand-500/10"
+                    : "border-line hover:border-line-strong hover:bg-surface-2"
                 )}
               >
-                <span className="block truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                <span className="block truncate text-sm font-semibold text-fg">
                   {algo.name}
                 </span>
-                <span className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
+                <span className="mt-0.5 flex items-center gap-1 text-[11px] text-muted">
                   <Complexity
                     value={algo.complexity.average}
                     size="xs"
@@ -125,7 +118,7 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex overflow-hidden rounded-lg border border-slate-300 dark:border-slate-700">
+          <div className="inline-flex items-center rounded-md border border-line bg-surface-2 p-0.5">
             {(
               [
                 { key: "asc", label: "Ascending", Icon: ArrowUpNarrowWide },
@@ -135,11 +128,12 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
               <button
                 key={key}
                 onClick={() => changeOrder(key)}
+                aria-pressed={order === key}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors",
+                  "inline-flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
                   order === key
-                    ? "bg-brand-600 text-white"
-                    : "bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800"
+                    ? "bg-brand-500 text-[#04201d]"
+                    : "text-ink hover:text-fg"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -150,9 +144,7 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
         </div>
 
         <div>
-          <p className="mb-2 text-xs font-medium text-slate-600 dark:text-slate-400">
-            Input shape
-          </p>
+          <p className="overline mb-2 text-muted">Input shape</p>
           <div className="flex flex-wrap gap-2">
             {ARRAY_PRESETS.map((p) => (
               <button
@@ -160,17 +152,17 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
                 onClick={() => handlePreset(p.id)}
                 aria-pressed={preset === p.id}
                 className={cn(
-                  "min-h-[30px] rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  "min-h-[30px] rounded-md border px-3 py-1 text-xs font-medium transition-colors",
                   preset === p.id
-                    ? "border-brand-500 bg-brand-600 text-white"
-                    : "border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+                    ? "border-brand-500 bg-brand-500 text-[#04201d]"
+                    : "border-line text-ink hover:bg-surface-2"
                 )}
               >
                 {p.label}
               </button>
             ))}
           </div>
-          <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+          <p className="mt-1.5 text-[11px] leading-relaxed text-muted">
             {ARRAY_PRESETS.find((p) => p.id === preset)?.description}
           </p>
         </div>
@@ -178,9 +170,9 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
         <div>
           <label
             htmlFor="custom-array"
-            className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400"
+            className="overline mb-1.5 block text-muted"
           >
-            Custom array ({MIN_SIZE}–{MAX_SIZE} integers between 1 and 999)
+            Custom array ({MIN_SIZE}–{MAX_SIZE} integers
           </label>
           <div className="flex flex-col gap-2 sm:flex-row">
             <textarea
@@ -194,10 +186,8 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
               }}
               placeholder="e.g. 42, 7, 19, 88, 3"
               className={cn(
-                "flex-1 rounded-lg border bg-white px-3 py-2 font-mono text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/50 dark:bg-slate-950 dark:text-slate-100",
-                customError
-                  ? "border-rose-400 dark:border-rose-500"
-                  : "border-slate-300 dark:border-slate-700"
+                "flex-1 rounded-md border bg-canvas px-3 py-2 font-mono text-xs text-fg focus:outline-none focus:ring-2 focus:ring-brand-500/50",
+                customError ? "border-rose-500" : "border-line"
               )}
             />
             <Button onClick={handleApplyCustom} className="sm:self-start">
@@ -205,17 +195,16 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
             </Button>
           </div>
           {customError && (
-            <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">
+            <p className="mt-1.5 text-xs text-rose-500">
               {customError}
             </p>
           )}
           {customSuccess && (
-            <p className="mt-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+            <p className="mt-1.5 text-xs text-emerald-500">
               {customSuccess}
             </p>
           )}
         </div>
-      </div>
-    </Card>
+    </Panel>
   );
 }

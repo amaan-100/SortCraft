@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import {
   Award,
-  BookOpen,
   CheckCircle2,
   Play,
   RotateCcw,
@@ -13,7 +12,8 @@ import {
 import { badges } from "@/data/badges";
 import { levels } from "@/data/levels";
 import { Button } from "@/components/ui/Button";
-import { Card, CardHeader } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
+import { Panel } from "@/components/ui/Panel";
 import { BadgeGrid } from "@/components/progress/BadgeGrid";
 import { XpBar } from "@/components/progress/XpBar";
 import { useAuth } from "@/context/AuthContext";
@@ -31,14 +31,12 @@ function StatTile({
   return (
     <Card className="p-4">
       <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
+        <span className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-500/10 text-brand-600 dark:text-brand-400">
           {icon}
         </span>
         <div>
-          <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-500">
-            {label}
-          </p>
-          <p className="text-xl font-bold">{value}</p>
+          <p className="overline text-muted">{label}</p>
+          <p className="mt-0.5 text-xl font-semibold tracking-tight">{value}</p>
         </div>
       </div>
     </Card>
@@ -74,10 +72,11 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Welcome back, {name} 👋
+          <p className="overline text-muted">Dashboard</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+            Welcome back, {name}
           </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-1.5 text-sm text-ink">
             Build your understanding, one algorithm at a time.
           </p>
         </div>
@@ -95,12 +94,12 @@ export default function DashboardPage() {
       </header>
 
       {syncError && (
-        <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-500/10 dark:text-amber-200">
+        <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-600 dark:text-amber-300">
           {syncError}
         </p>
       )}
       {loading && (
-        <p className="mb-4 text-xs text-slate-500">Loading your saved progress…</p>
+        <p className="mb-4 text-xs text-muted">Loading your saved progress…</p>
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -126,30 +125,33 @@ export default function DashboardPage() {
         />
       </div>
 
-      <Card className="mt-6 p-4">
+      <Panel
+        dots={false}
+        title="PROGRESS"
+        className="mt-6"
+        bodyClassName="p-4"
+      >
         <XpBar
           totalXp={totalXp}
           xpAvailable={xpAvailable}
           completed={completedLevelIds.length}
           totalLevels={levels.length}
         />
-      </Card>
+      </Panel>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader
-            title="Continue learning"
-            icon={<BookOpen className="h-4 w-4 text-brand-600 dark:text-brand-400" />}
-          />
-          <div className="space-y-4 p-4">
-            <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
-                Up next · Level {nextLevel.id}
-              </p>
-              <h3 className="mt-1 text-base font-semibold">{nextLevel.title}</h3>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                {nextLevel.subtitle}
-              </p>
+        <Panel
+          dots={false}
+          title="CONTINUE LEARNING"
+          className="lg:col-span-2 min-w-0"
+          bodyClassName="space-y-4 p-4"
+        >
+          <div className="rounded-md border border-line bg-surface-2/40 p-4">
+            <p className="overline text-brand-600 dark:text-brand-400">
+              Up next · Level {nextLevel.id}
+            </p>
+            <h3 className="mt-1 text-base font-semibold">{nextLevel.title}</h3>
+            <p className="mt-1 text-sm text-ink">{nextLevel.subtitle}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Link to={`/levels/${nextLevel.id}`}>
                   <Button size="sm">
@@ -174,7 +176,7 @@ export default function DashboardPage() {
             <div>
               <h3 className="mb-2 text-sm font-semibold">Recent activity</h3>
               {recent.length === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-slate-500">
+                <p className="text-sm text-muted">
                   No quizzes taken yet — start with Level 1.
                 </p>
               ) : (
@@ -182,14 +184,14 @@ export default function DashboardPage() {
                   {recent.map((r) => (
                     <li
                       key={r.levelId}
-                      className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800/50"
+                      className="flex items-center justify-between rounded-md border border-line bg-surface-2/40 px-3 py-2 text-sm"
                     >
                       <span className="flex items-center gap-2">
                         <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                         Level {r.levelId} ·{" "}
                         {levels.find((l) => l.id === r.levelId)?.title}
                       </span>
-                      <span className="font-mono text-xs text-slate-500">
+                      <span className="font-mono text-xs text-muted">
                         {r.bestScore}/{r.questions} · {r.xpEarned} XP
                       </span>
                     </li>
@@ -197,14 +199,9 @@ export default function DashboardPage() {
                 </ul>
               )}
             </div>
-          </div>
-        </Card>
+        </Panel>
 
-        <Card>
-          <CardHeader
-            title="Level map"
-            icon={<Trophy className="h-4 w-4 text-brand-600 dark:text-brand-400" />}
-          />
+        <Panel dots={false} title="LEVEL MAP">
           <ul className="max-h-[360px] space-y-1.5 overflow-auto p-4 text-sm">
             {levels.map((l) => {
               const done = completedLevelIds.includes(l.id);
@@ -217,14 +214,12 @@ export default function DashboardPage() {
                         ? "bg-emerald-500"
                         : unlocked
                           ? "bg-brand-500"
-                          : "bg-slate-300 dark:bg-slate-700"
+                          : "bg-line-strong"
                     }`}
                   />
                   <span
                     className={
-                      unlocked
-                        ? "text-slate-700 dark:text-slate-300"
-                        : "text-slate-400 dark:text-slate-600"
+                      unlocked ? "text-fg/80" : "text-muted"
                     }
                   >
                     {l.id}. {l.title}
@@ -233,7 +228,7 @@ export default function DashboardPage() {
               );
             })}
           </ul>
-        </Card>
+        </Panel>
       </div>
 
       <section className="mt-8">
@@ -241,9 +236,9 @@ export default function DashboardPage() {
         <BadgeGrid earned={earnedBadgeIds} />
       </section>
 
-      <p className="mt-8 text-xs text-slate-500 dark:text-slate-500">
+      <p className="mt-8 text-xs text-muted">
         Signed in as{" "}
-        <span className="font-semibold text-slate-700 dark:text-slate-300">
+        <span className="font-semibold text-fg">
           {displayName}
         </span>
         {profile?.username ? ` · @${profile.username}` : ""} ·{" "}

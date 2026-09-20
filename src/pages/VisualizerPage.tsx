@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { isAlgorithmId } from "@/algorithms";
 import { useSortPlayer } from "@/hooks/useSortPlayer";
+import { Panel } from "@/components/ui/Panel";
 import { BarChart } from "@/components/visualizer/BarChart";
 import { CodePanel } from "@/components/visualizer/CodePanel";
 import { ComplexityCard } from "@/components/visualizer/ComplexityCard";
@@ -10,7 +11,6 @@ import { Controls } from "@/components/visualizer/Controls";
 import { ExplanationPanel } from "@/components/visualizer/ExplanationPanel";
 import { Legend } from "@/components/visualizer/Legend";
 import { StatsBar } from "@/components/visualizer/StatsBar";
-import { Card } from "@/components/ui/Card";
 
 export default function VisualizerPage() {
   const [searchParams] = useSearchParams();
@@ -25,6 +25,7 @@ export default function VisualizerPage() {
       lastRequested.current = requested;
       player.changeAlgorithm(requested);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requested, player]);
 
   const {
@@ -36,66 +37,84 @@ export default function VisualizerPage() {
     goToStep,
     order,
     engine,
+    baseArray,
   } = player;
+
+  const stageTitle = `${algorithm.name.toLowerCase()}.sort — ${
+    order === "asc" ? "ascending" : "descending"
+  } — n = ${baseArray.length}`;
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-7xl px-4 py-8 sm:px-6">
-      <header className="mb-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            {algorithm.name} visualizer
+      <header className="mb-8">
+        <p className="overline text-muted">Visualizer</p>
+        <div className="mt-1 flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            {algorithm.name}
           </h1>
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+            title={
               engine === "java"
-                ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700/60 dark:bg-emerald-900/30 dark:text-emerald-300"
-                : "border-slate-300 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300"
-            }`}
+                ? "Current run is computed by the JVM service"
+                : "Current run is computed in the browser"
+            }
+            className="inline-flex items-center gap-1.5 rounded border border-line bg-surface-2 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-ink"
           >
             <span
               className={`h-1.5 w-1.5 rounded-full ${
-                engine === "java" ? "bg-emerald-500" : "bg-slate-400"
+                engine === "java" ? "bg-brand-500" : "bg-muted"
               }`}
             />
-            {engine === "java" ? "Java engine" : "Browser engine"}
+            {engine === "java" ? "JVM" : "browser"}
           </span>
         </div>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1.5 text-sm text-ink">
           {algorithm.tagline} Sorting in{" "}
-          <span className="font-medium text-slate-800 dark:text-slate-200">
+          <span className="font-medium text-fg">
             {order === "asc" ? "ascending" : "descending"}
           </span>{" "}
           order.
         </p>
       </header>
 
-      <div className="grid min-w-0 gap-6 lg:grid-cols-3">
-        <div className="min-w-0 space-y-6 lg:col-span-2">
-          <Card className="min-w-0 p-4">
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        {/* Stage — the instrument */}
+        <div className="min-w-0 space-y-6">
+          <Panel
+            title={stageTitle}
+            dots
+            action={
+              <span className="truncate font-mono text-[10px] uppercase tracking-widest text-muted">
+                {currentStep?.phase ?? "ready"}
+              </span>
+            }
+          >
             <BarChart values={displayArray} step={currentStep} />
-            <div className="mt-4 space-y-4">
-              <Controls player={player} />
-              <StatsBar
-                step={currentStep}
-                stepIndex={stepIndex}
-                totalSteps={totalSteps}
-                onSeek={goToStep}
-              />
-              <Legend />
-            </div>
-          </Card>
-
-          <ExplanationPanel step={currentStep} stepIndex={stepIndex} />
-          <ConfigPanel player={player} />
-          <ComplexityCard algorithm={algorithm} />
+            <StatsBar
+              step={currentStep}
+              stepIndex={stepIndex}
+              totalSteps={totalSteps}
+              onSeek={goToStep}
+            />
+            <Controls player={player} />
+            <Legend />
+          </Panel>
         </div>
 
+        {/* Tool rail — read the code first, follow the current operation */}
         <div className="min-w-0 space-y-6">
           <CodePanel
             algorithm={algorithm}
             activeLine={currentStep ? currentStep.pseudocodeLine : null}
           />
+          <ExplanationPanel step={currentStep} stepIndex={stepIndex} />
         </div>
+      </div>
+
+      {/* Instrument deck — below the stage */}
+      <div className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <ConfigPanel player={player} />
+        <ComplexityCard algorithm={algorithm} />
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { BookOpen, CheckCircle2, Circle, Lock, TrendingUp } from "lucide-react";
+import { BookOpen, CheckCircle2, Circle, Lock } from "lucide-react";
 import { levels } from "@/data/levels";
 import { badges } from "@/data/badges";
 import { Button } from "@/components/ui/Button";
-import { Card, CardHeader } from "@/components/ui/Card";
+import { Panel } from "@/components/ui/Panel";
 import { ScrollableTable } from "@/components/ui/ScrollableTable";
 import { BadgeGrid } from "@/components/progress/BadgeGrid";
 import { XpBar } from "@/components/progress/XpBar";
@@ -38,20 +38,20 @@ export default function ProgressPage() {
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
           {displayName}’s progress
         </h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1 text-sm text-ink">
           Every level, quiz score and badge you have earned so far.
         </p>
       </header>
 
       {syncError && (
-        <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-500/10 dark:text-amber-200">
+        <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-600 dark:text-amber-300">
           {syncError}
         </p>
       )}
 
-      <Card className="mb-6 p-4">
+      <Panel dots={false} title="PROGRESS" className="mb-6" bodyClassName="p-4">
         {loading ? (
-          <div className="h-12 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800" />
+          <div className="h-12 animate-pulse rounded-md bg-surface-2" />
         ) : (
           <XpBar
             totalXp={totalXp}
@@ -60,17 +60,17 @@ export default function ProgressPage() {
             totalLevels={levels.length}
           />
         )}
-      </Card>
+      </Panel>
 
-      <Card className="mb-6 min-w-0 max-w-full overflow-hidden">
-        <CardHeader
-          title="Level progress"
-          icon={<TrendingUp className="h-4 w-4 text-brand-600 dark:text-brand-400" />}
-        />
+      <Panel
+        dots={false}
+        title="LEVEL PROGRESS"
+        className="mb-6 min-w-0 max-w-full overflow-hidden"
+      >
         {!hasAnyActivity ? (
           <div className="p-8 text-center">
-            <BookOpen className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-slate-700" />
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <BookOpen className="mx-auto mb-3 h-8 w-8 text-muted" />
+            <p className="text-sm text-ink">
               You haven’t completed any levels yet.
             </p>
             <Link to="/levels/1" className="mt-4 inline-block">
@@ -83,7 +83,7 @@ export default function ProgressPage() {
               <caption className="sr-only">
                 Your status, best quiz score and XP earned for each of the ten levels.
               </caption>
-              <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/50">
+              <thead className="text-left text-xs uppercase tracking-wide text-muted">
                 <tr>
                   {["Level", "Status", "Best score", "XP", "Last attempt"].map((h) => (
                     <th
@@ -100,7 +100,7 @@ export default function ProgressPage() {
                 {rows.map(({ level, record, unlocked, completed }) => (
                   <tr
                     key={level.id}
-                    className="border-t border-slate-200 dark:border-slate-800"
+                    className="border-t border-line"
                   >
                     <th scope="row" className="px-4 py-2 text-left font-medium">
                       <span className="block min-w-[10rem] truncate">
@@ -114,12 +114,12 @@ export default function ProgressPage() {
                           Completed
                         </span>
                       ) : unlocked ? (
-                        <span className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                        <span className="inline-flex items-center gap-1.5 text-ink">
                           <Circle className="h-4 w-4" />
                           Unlocked
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-slate-400 dark:text-slate-600">
+                        <span className="inline-flex items-center gap-1.5 text-muted">
                           <Lock className="h-3.5 w-3.5" />
                           Locked
                         </span>
@@ -131,7 +131,7 @@ export default function ProgressPage() {
                     <td className="whitespace-nowrap px-4 py-2 font-mono tabular-nums">
                       {record?.xpEarned ?? 0}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-slate-500">
+                    <td className="whitespace-nowrap px-4 py-2 text-muted">
                       {record
                         ? new Date(record.completedAt).toLocaleDateString()
                         : "—"}
@@ -142,12 +142,12 @@ export default function ProgressPage() {
             </table>
           </ScrollableTable>
         )}
-      </Card>
+      </Panel>
 
       <section>
         <h2 className="mb-3 text-lg font-semibold">
           Badges{" "}
-          <span className="text-sm font-normal text-slate-500">
+          <span className="text-sm font-normal text-muted">
             ({earnedBadgeIds.length} of {badges.length})
           </span>
         </h2>

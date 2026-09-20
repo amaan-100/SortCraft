@@ -53,7 +53,7 @@ export function ScrollableTable({
         {children}
       </div>
       {overflowing && (
-        <p className="mt-2 flex items-center gap-1.5 px-4 pb-1 text-xs text-slate-500 dark:text-slate-500">
+        <p className="mt-2 flex items-center gap-1.5 px-4 pb-1 text-xs text-muted">
           <MoveHorizontal className="h-3.5 w-3.5 shrink-0" aria-hidden />
           {hint}
         </p>

@@ -14,7 +14,7 @@ export function MiniBars({
   const max = Math.max(...values, 1);
   return (
     <div
-      className="flex w-full min-w-0 max-w-full items-end gap-px overflow-hidden rounded-lg bg-slate-100/70 p-2 dark:bg-slate-950/60"
+      className="flex w-full min-w-0 max-w-full items-end gap-px overflow-hidden rounded-md bg-canvas p-2 [background-image:linear-gradient(to_top,var(--line)_1px,transparent_1px)] [background-size:100%_25%]"
       style={{ height }}
     >
       {values.map((value, index) => {
@@ -25,11 +25,7 @@ export function MiniBars({
             key={index}
             className={cn(
               "min-w-0 flex-1 rounded-t-[2px] transition-[height] duration-150",
-              sorted
-                ? "bg-emerald-500"
-                : active
-                  ? "bg-rose-500"
-                  : "bg-slate-400 dark:bg-slate-600"
+              sorted ? "bg-emerald-500" : active ? "bg-rose-500" : "bg-line-strong"
             )}
             style={{ height: `${(value / max) * 100}%` }}
           />

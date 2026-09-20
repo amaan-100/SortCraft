@@ -42,16 +42,17 @@ export function CodePanel({
     <Card className="overflow-hidden">
       <CardHeader
         title={
-          <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800">
+          <div className="flex items-center gap-0.5 rounded-md border border-line bg-surface-2 p-0.5">
             {(["pseudocode", "java"] as Tab[]).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
+                aria-pressed={tab === t}
                 className={cn(
-                  "rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors",
+                  "rounded px-3 py-1 font-mono text-[11px] uppercase tracking-widest transition-colors",
                   tab === t
-                    ? "bg-white text-slate-900 shadow-sm dark:bg-slate-950 dark:text-slate-100"
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    ? "bg-brand-500 text-[#04201d]"
+                    : "text-ink hover:text-fg"
                 )}
               >
                 {t === "java" ? "Java" : "Pseudocode"}
@@ -63,7 +64,7 @@ export function CodePanel({
         action={
           <button
             onClick={handleCopy}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+            className="inline-flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-surface-2 hover:text-fg"
           >
             {copied ? (
               <Check className="h-3.5 w-3.5 text-emerald-500" />
@@ -75,7 +76,7 @@ export function CodePanel({
         }
       />
 
-      <div className="max-h-[360px] w-full min-w-0 max-w-full overflow-auto bg-slate-50 dark:bg-slate-950/60">
+      <div className="max-h-[360px] w-full min-w-0 max-w-full overflow-auto bg-canvas">
         <pre className="min-w-full font-mono text-[12px] leading-6">
           {(tab === "pseudocode" ? algorithm.pseudocode : javaLines).map((line, i) => {
             const highlighted = tab === "pseudocode" && activeLine === i;
@@ -85,13 +86,13 @@ export function CodePanel({
                 className={cn(
                   "flex gap-3 px-3",
                   highlighted
-                    ? "bg-brand-500/15 text-brand-900 dark:text-brand-100"
-                    : "text-slate-700 dark:text-slate-300"
+                    ? "bg-brand-500/15 text-brand-700 dark:text-brand-300"
+                    : "text-ink"
                 )}
               >
                 <span
                   className={cn(
-                    "w-6 shrink-0 select-none text-right text-slate-400 dark:text-slate-600",
+                    "w-6 shrink-0 select-none text-right text-muted",
                     highlighted && "font-bold text-brand-600 dark:text-brand-400"
                   )}
                 >
@@ -105,12 +106,12 @@ export function CodePanel({
       </div>
 
       {copyError && (
-        <p className="border-t border-slate-200 px-4 py-2 text-xs text-rose-600 dark:border-slate-800 dark:text-rose-400">
+        <p className="border-t border-line px-4 py-2 text-xs text-rose-500">
           {copyError}
         </p>
       )}
       {tab === "java" && (
-        <p className="border-t border-slate-200 px-4 py-2 text-[11px] text-slate-500 dark:border-slate-800 dark:text-slate-500">
+        <p className="border-t border-line px-4 py-2 text-[11px] text-muted">
           Line highlighting follows the pseudocode tab during the animation.
         </p>
       )}

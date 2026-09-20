@@ -1,13 +1,11 @@
 node_modules/
 dist/
 .env
+.vscode/
 *.log
+*.pid
 
 # Java backend build output
 backend/target/
 backend/.mvn/
 backend/gradle/
-backend/run.pid
-
-# local dev server pid file
-vite-dev.pid

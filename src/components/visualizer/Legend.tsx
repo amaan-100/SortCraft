@@ -1,7 +1,7 @@
 const items = [
-  { color: "bg-slate-400 dark:bg-slate-600", label: "Unsorted" },
+  { color: "bg-line-strong", label: "Unsorted" },
   { color: "bg-rose-500", label: "Comparing" },
-  { color: "bg-amber-400", label: "Selected / key / active range" },
+  { color: "bg-amber-400", label: "Selected / key / range" },
   { color: "bg-violet-500", label: "Pivot" },
   { color: "bg-orange-500", label: "Swapping / moving" },
   { color: "bg-emerald-500", label: "In final position" },
@@ -9,14 +9,11 @@ const items = [
 
 export function Legend() {
   return (
-    <ul className="flex flex-wrap items-center gap-x-4 gap-y-2">
+    <ul className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line bg-surface-2/40 px-4 py-2.5">
       {items.map((item) => (
-        <li
-          key={item.label}
-          className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400"
-        >
-          <span className={`h-3 w-3 rounded-sm ${item.color}`} aria-hidden />
-          {item.label}
+        <li key={item.label} className="flex items-center gap-2">
+          <span className={`h-2.5 w-2.5 rounded-[3px] ${item.color}`} aria-hidden />
+          <span className="text-[11px] text-ink">{item.label}</span>
         </li>
       ))}
     </ul>

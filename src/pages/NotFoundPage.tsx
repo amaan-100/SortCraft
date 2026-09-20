@@ -9,7 +9,7 @@ export default function NotFoundPage() {
         404
       </p>
       <h1 className="mt-3 text-xl font-semibold">This page is out of bounds</h1>
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-2 text-sm text-ink">
         Like an index past the end of the array, this route doesn&apos;t exist.
       </p>
       <Link to="/" className="mt-6">

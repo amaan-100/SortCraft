@@ -6,12 +6,12 @@ import { cn } from "@/utils/cn";
 export type BarState = "idle" | "compare" | "selected" | "moved" | "sorted" | "pivot";
 
 const barClasses: Record<BarState, string> = {
-  idle: "bg-slate-400 dark:bg-slate-600",
-  compare: "bg-rose-500 dark:bg-rose-500",
-  selected: "bg-amber-400 dark:bg-amber-400",
-  moved: "bg-orange-500 dark:bg-orange-500",
-  sorted: "bg-emerald-500 dark:bg-emerald-500",
-  pivot: "bg-violet-500 dark:bg-violet-500",
+  idle: "bg-line-strong",
+  compare: "bg-rose-500",
+  selected: "bg-amber-400",
+  moved: "bg-orange-500",
+  sorted: "bg-emerald-500",
+  pivot: "bg-violet-500",
 };
 
 const MOVE_ACTIONS = ["SWAP", "SHIFT", "INSERT", "OVERWRITE"];
@@ -43,9 +43,7 @@ export function BarChart({ values, step }: BarChartProps) {
 
   return (
     <div
-      // min-w-0 + max-w-full keep the chart inside the card at 320px; the bars
-      // flex down rather than forcing the document to scroll sideways.
-      className="flex h-[320px] w-full min-w-0 max-w-full items-end gap-px overflow-hidden rounded-lg bg-slate-100/70 p-2 sm:h-[420px] sm:gap-[2px] sm:p-3 dark:bg-slate-950/60"
+      className="flex h-[320px] w-full min-w-0 max-w-full items-end gap-px overflow-hidden bg-canvas p-2 [background-image:linear-gradient(to_top,var(--line)_1px,transparent_1px)] [background-size:100%_25%] sm:h-[420px] sm:gap-[2px] sm:p-3"
       role="img"
       aria-label={`Array visualization with ${values.length} bars. ${
         step?.explanation ?? "Ready to sort."
@@ -64,7 +62,7 @@ export function BarChart({ values, step }: BarChartProps) {
               className={cn(
                 "w-full rounded-t-[3px]",
                 barClasses[state],
-                lifted && "ring-2 ring-white/60 dark:ring-white/30"
+                lifted && "ring-2 ring-canvas"
               )}
               initial={false}
               animate={{
@@ -78,12 +76,12 @@ export function BarChart({ values, step }: BarChartProps) {
               }
             />
             {showValues && (
-              <span className="mt-1 text-center font-mono text-[10px] leading-none text-slate-600 dark:text-slate-400">
+              <span className="mt-1 text-center font-mono text-[10px] leading-none text-muted">
                 {value}
               </span>
             )}
             {showIndices && (
-              <span className="text-center font-mono text-[9px] leading-tight text-slate-400 dark:text-slate-600">
+              <span className="text-center font-mono text-[9px] leading-tight text-muted">
                 {index}
               </span>
             )}

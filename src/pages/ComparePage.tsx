@@ -9,13 +9,13 @@ import {
   Play,
   RotateCcw,
   Shuffle,
-  SplitSquareHorizontal,
 } from "lucide-react";
 import { algorithmList, algorithms } from "@/algorithms";
 import type { AlgorithmId, SortOrder } from "@/algorithms/types";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Complexity } from "@/components/ui/Complexity";
+import { Panel } from "@/components/ui/Panel";
 import { ScrollableTable } from "@/components/ui/ScrollableTable";
 import { Slider } from "@/components/ui/Slider";
 import { MiniBars } from "@/components/visualizer/MiniBars";
@@ -122,68 +122,75 @@ export default function ComparePage() {
   // Finish order: fewer recorded steps = the algorithm finishes earlier in the
   // race animation, so ranking is deterministic for a fixed array.
   const byStepsAsc = [...finals].sort((a, b) => a.steps - b.steps);
-  const rankById = new Map<string, number>(
-    byStepsAsc.map((f, i) => [f.id, i + 1])
-  );
+  const rankById = new Map<string, number>(byStepsAsc.map((f, i) => [f.id, i + 1]));
   const winner = byStepsAsc[0] ?? null;
   const raceOver = tick >= 0 && tick >= maxTicks - 1;
+
+  // Live standings: who is furthest along the tape right now.
+  const liveStandings = runs
+    .map((run) => {
+      const last = run.steps.length - 1;
+      return {
+        id: run.algorithm.id,
+        name: run.algorithm.name,
+        at: Math.min(tick, last),
+        progress: run.steps.length > 0 ? ((Math.min(tick, last) + 1) / run.steps.length) * 100 : 0,
+      };
+    })
+    .sort((a, b) => b.progress - a.progress);
 
   const finishChip = (id: AlgorithmId, steps: number) => {
     const rank = rankById.get(id) ?? 0;
     if (rank === 1) {
       return (
-        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:border-amber-500/50 dark:bg-amber-500/15 dark:text-amber-300">
+        <span className="inline-flex shrink-0 items-center gap-1 rounded border border-amber-500/50 bg-amber-500/15 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-300">
           <Crown className="h-3 w-3" />
-          1st · {steps} steps
+          {ordinal(rank)} · {steps}
         </span>
       );
     }
     if (rank === 2) {
       return (
-        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
+        <span className="inline-flex shrink-0 items-center gap-1 rounded border border-line bg-surface-2 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wide text-ink">
           <Medal className="h-3 w-3" />
-          2nd · {steps} steps
+          {ordinal(rank)} · {steps}
         </span>
       );
     }
     if (rank === 3) {
       return (
-        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-orange-300 bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700 dark:border-orange-500/50 dark:bg-orange-500/15 dark:text-orange-300">
+        <span className="inline-flex shrink-0 items-center gap-1 rounded border border-orange-500/50 bg-orange-500/15 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wide text-orange-600 dark:text-orange-300">
           <Medal className="h-3 w-3" />
-          3rd · {steps} steps
+          {ordinal(rank)} · {steps}
         </span>
       );
     }
     return (
-      <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-300 bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700 dark:border-sky-500/50 dark:bg-sky-500/15 dark:text-sky-300">
+      <span className="inline-flex shrink-0 items-center gap-1 rounded border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wide text-sky-600 dark:text-sky-300">
         <Flag className="h-3 w-3" />
-        {ordinal(rank)} · {steps} steps
+        {ordinal(rank)} · {steps}
       </span>
     );
   };
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-7xl px-4 py-8 sm:px-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+      <header className="mb-8">
+        <p className="overline text-muted">Compare</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
           Algorithm comparison
         </h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1.5 text-sm text-ink">
           Run several algorithms on the <strong>same array</strong> and watch which one
           finishes first — and at what cost.
         </p>
       </header>
 
-      <Card className="mb-6">
-        <CardHeader
-          title="Setup"
-          icon={
-            <SplitSquareHorizontal className="h-4 w-4 text-brand-600 dark:text-brand-400" />
-          }
-        />
+      {/* Setup */}
+      <Panel dots={false} title="RACE SETUP" className="mb-6">
         <div className="space-y-5 p-4">
           <div>
-            <p className="mb-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+            <p className="overline mb-2 text-muted">
               Algorithms ({selected.length} selected)
             </p>
             <div className="flex flex-wrap gap-2">
@@ -193,10 +200,10 @@ export default function ComparePage() {
                   onClick={() => toggle(algo.id)}
                   aria-pressed={selected.includes(algo.id)}
                   className={cn(
-                    "min-h-[40px] shrink-0 rounded-full border px-3.5 py-2 text-xs font-medium transition-colors",
+                    "min-h-[36px] shrink-0 rounded-md border px-3.5 py-1.5 text-xs font-medium transition-colors",
                     selected.includes(algo.id)
-                      ? "border-brand-500 bg-brand-600 text-white"
-                      : "border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+                      ? "border-brand-500 bg-brand-500 text-[#04201d]"
+                      : "border-line text-ink hover:bg-surface-2 hover:text-fg"
                   )}
                 >
                   {algo.name}
@@ -249,7 +256,7 @@ export default function ComparePage() {
               <Shuffle className="h-4 w-4" />
               New array
             </Button>
-            <div className="inline-flex overflow-hidden rounded-lg border border-slate-300 dark:border-slate-700">
+            <div className="inline-flex items-center rounded-md border border-line bg-surface-2 p-0.5">
               {(
                 [
                   { key: "asc", Icon: ArrowUpNarrowWide, label: "Asc" },
@@ -262,11 +269,12 @@ export default function ComparePage() {
                     reset();
                     setOrder(key);
                   }}
+                  aria-pressed={order === key}
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium",
+                    "inline-flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
                     order === key
-                      ? "bg-brand-600 text-white"
-                      : "bg-white text-slate-600 dark:bg-slate-900 dark:text-slate-400"
+                      ? "bg-brand-500 text-[#04201d]"
+                      : "text-ink hover:text-fg"
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -274,64 +282,96 @@ export default function ComparePage() {
                 </button>
               ))}
             </div>
-            <span className="w-full shrink-0 font-mono text-xs text-slate-500 sm:ml-auto sm:w-auto">
+            <span className="w-full shrink-0 font-mono text-xs text-muted sm:ml-auto sm:w-auto">
               tick {tick + 1} / {maxTicks}
             </span>
           </div>
         </div>
-      </Card>
+      </Panel>
 
+      {/* Live standings tape */}
+      {tick >= 0 && (
+        <Card className="mb-6">
+          <div className="flex items-center gap-4 border-b border-line px-4 py-2.5">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
+              Live standings
+            </span>
+            <span className="flex flex-1 flex-wrap items-center gap-x-4 gap-y-1.5">
+              {liveStandings.map((l, i) => (
+                <span
+                  key={l.id}
+                  className="flex items-center gap-1.5 font-mono text-[11px]"
+                >
+                  <span
+                    className={cn(
+                      "flex h-4 w-4 items-center justify-center rounded text-[9px]",
+                      i === 0
+                        ? "bg-amber-500/20 text-amber-600 dark:text-amber-300"
+                        : "bg-surface-2 text-muted"
+                    )}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="text-ink">{l.name}</span>
+                  <span className="tabular-nums text-muted">
+                    {Math.round(l.progress)}%
+                  </span>
+                </span>
+              ))}
+            </span>
+          </div>
+        </Card>
+      )}
+
+      {/* Lanes */}
       <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-        {runs.map((run) => {
+        {runs.map((run, i) => {
           const idx = Math.min(tick, run.steps.length - 1);
           const step = idx >= 0 ? run.steps[idx] : null;
           const done = tick >= run.steps.length - 1 && tick >= 0;
-          const progress =
-            run.steps.length > 0 ? ((idx + 1) / run.steps.length) * 100 : 0;
+          const progress = run.steps.length > 0 ? ((idx + 1) / run.steps.length) * 100 : 0;
           return (
-            <Card
+            <Panel
               key={run.algorithm.id}
+              dots={false}
               className={cn(
-                "min-w-0 p-4",
                 done && run.algorithm.id === winner?.id &&
-                  "border-amber-400/70 ring-1 ring-amber-400/40 dark:border-amber-500/60"
+                  "border-amber-500/70 shadow-[0_0_0_1px_var(--color-amber-500),0_16px_48px_-24px_color-mix(in_oklab,var(--color-amber-500)_70%,transparent)]"
               )}
+              title={`lane ${String(i + 1).padStart(2, "0")} · ${run.algorithm.name.toUpperCase()}`}
+              action={done && finishChip(run.algorithm.id, run.steps.length)}
             >
-              <div className="mb-2 flex min-w-0 items-center justify-between gap-2">
-                <h2 className="min-w-0 truncate text-sm font-semibold">
-                  {run.algorithm.name}
-                </h2>
-                {done && finishChip(run.algorithm.id, run.steps.length)}
-              </div>
-              <p className="mb-2 flex flex-wrap items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
-                <Complexity value={run.algorithm.complexity.average} size="xs" />
-                <span className="shrink-0">average</span>
-              </p>
-              <MiniBars values={step ? step.array : array} step={step} />
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-                <div
-                  className="h-full bg-brand-500 transition-[width] duration-150"
-                  style={{ width: `${Math.max(progress, 0)}%` }}
-                />
-              </div>
-              <dl className="mt-2 grid min-w-0 grid-cols-3 gap-2 text-center font-mono text-[11px]">
-                {[
-                  { label: "cmp", value: step?.comparisons ?? 0 },
-                  { label: "mov", value: step?.swaps ?? 0 },
-                  { label: "step", value: `${idx + 1}/${run.steps.length}` },
-                ].map((stat) => (
+              <div className="p-3">
+                <p className="mb-2 flex items-center gap-1.5 text-[11px] text-muted">
+                  <Complexity value={run.algorithm.complexity.average} size="xs" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest">
+                    average
+                  </span>
+                </p>
+                <MiniBars values={step ? step.array : array} step={step} />
+                <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-surface-3">
                   <div
-                    key={stat.label}
-                    className="min-w-0 truncate rounded bg-slate-100 py-1 dark:bg-slate-800/60"
-                  >
-                    <dt className="sr-only">{stat.label}</dt>
-                    <dd className="truncate">
-                      {stat.label} {stat.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </Card>
+                    className="h-full rounded-full bg-brand-500 transition-[width] duration-150"
+                    style={{ width: `${Math.max(progress, 0)}%` }}
+                  />
+                </div>
+                <dl className="mt-2.5 grid min-w-0 grid-cols-3 divide-x divide-line rounded-md border border-line bg-surface-2/40 text-center font-mono text-[11px]">
+                  {[
+                    { label: "cmp", value: step?.comparisons ?? 0 },
+                    { label: "mov", value: step?.swaps ?? 0 },
+                    { label: "step", value: `${idx + 1}/${run.steps.length}` },
+                  ].map((stat) => (
+                    <div key={stat.label} className="min-w-0 truncate px-2 py-1.5">
+                      <dt className="sr-only">{stat.label}</dt>
+                      <dd className="truncate">
+                        <span className="text-muted">{stat.label} </span>
+                        <span className="tabular-nums text-fg">{stat.value}</span>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </Panel>
           );
         })}
       </div>
@@ -346,7 +386,7 @@ export default function ComparePage() {
               current array, alongside their best-case, worst-case and space
               complexities and whether they are stable.
             </caption>
-            <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/50">
+            <thead className="bg-surface-2/60 text-left font-mono text-[10px] uppercase tracking-widest text-muted">
               <tr>
                 {[
                   "Algorithm",
@@ -362,7 +402,7 @@ export default function ComparePage() {
                   <th
                     key={h}
                     scope="col"
-                    className="whitespace-nowrap px-4 py-2 font-medium"
+                    className="whitespace-nowrap px-4 py-2.5 font-medium"
                   >
                     {h}
                   </th>
@@ -377,8 +417,8 @@ export default function ComparePage() {
                   <tr
                     key={f.id}
                     className={cn(
-                      "border-t border-slate-200 dark:border-slate-800",
-                      isWinner && "bg-amber-50/70 dark:bg-amber-500/10"
+                      "border-t border-line",
+                      isWinner && "bg-amber-500/[0.06] dark:bg-amber-500/10"
                     )}
                   >
                     <th
@@ -409,8 +449,7 @@ export default function ComparePage() {
                     <td
                       className={cn(
                         "px-4 py-2 font-mono tabular-nums",
-                        isWinner &&
-                          "font-bold text-amber-600 dark:text-amber-400"
+                        isWinner && "font-bold text-amber-600 dark:text-amber-400"
                       )}
                     >
                       {ordinal(rank)}
@@ -424,23 +463,21 @@ export default function ComparePage() {
                     <td className="px-4 py-2">
                       <Complexity value={f.complexity.space} size="xs" />
                     </td>
-                    <td className="whitespace-nowrap px-4 py-2">
-                      {f.complexity.stable ? "Yes" : "No"}
-                    </td>
+                    <td className="whitespace-nowrap px-4 py-2">{f.complexity.stable ? "Yes" : "No"}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </ScrollableTable>
-        <p className="border-t border-slate-200 px-4 py-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-500">
+        <p className="border-t border-line px-4 py-3 text-xs text-muted">
           Green values mark the lowest count for this input. “Moves” counts swaps plus
           array writes, so merge sort — which copies values rather than swapping — is
           measured fairly against in-place sorts. “Finish” ranks who completed the
-          race first (fewest steps); the gold row is the overall winner.
+          race first (fewest steps); the amber row is the overall winner.
         </p>
         {raceOver && winner && (
-          <p className="border-t border-slate-200 px-4 py-3 text-xs text-slate-600 dark:border-slate-400">
+          <p className="border-t border-line px-4 py-3 text-xs text-ink">
             <span className="font-semibold text-amber-600 dark:text-amber-400">
               <Crown className="mb-0.5 mr-1 inline h-3.5 w-3.5" />
               {winner.name} won the race in {winner.steps} steps

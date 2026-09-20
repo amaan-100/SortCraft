@@ -12,22 +12,22 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-brand-600 text-white hover:bg-brand-700 focus-visible:ring-brand-500 shadow-sm disabled:hover:bg-brand-600",
+    "bg-brand-500 text-[#04201d] hover:bg-brand-400 active:bg-brand-600 focus-visible:ring-brand-500/50",
   secondary:
-    "bg-slate-200 text-slate-900 hover:bg-slate-300 focus-visible:ring-slate-400 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700",
+    "bg-surface-2 text-fg hover:bg-surface-3 focus-visible:ring-fg/25 border border-line",
   ghost:
-    "bg-transparent text-slate-700 hover:bg-slate-200/70 dark:text-slate-300 dark:hover:bg-slate-800",
+    "bg-transparent text-ink hover:text-fg hover:bg-surface-2 focus-visible:ring-fg/25",
   danger:
-    "bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500 shadow-sm",
+    "bg-rose-500 text-white hover:bg-rose-400 active:bg-rose-600 focus-visible:ring-rose-500/50",
   outline:
-    "border border-slate-300 bg-white text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800",
+    "border border-line bg-transparent text-fg hover:bg-surface-2 hover:border-line-strong focus-visible:ring-fg/25",
 };
 
 const sizes: Record<Size, string> = {
   sm: "h-8 px-3 text-xs gap-1.5",
   md: "h-10 px-4 text-sm gap-2",
-  lg: "h-12 px-6 text-base gap-2",
-  icon: "h-10 w-10 justify-center",
+  lg: "h-12 px-5 text-[15px] gap-2",
+  icon: "h-9 w-9 justify-center",
 };
 
 export function Button({
@@ -40,9 +40,9 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center rounded-lg font-medium transition-colors duration-150",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950",
-        "disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex items-center rounded-md font-medium transition-colors duration-150",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-0",
+        "disabled:cursor-not-allowed disabled:opacity-45",
         variants[variant],
         sizes[size],
         className

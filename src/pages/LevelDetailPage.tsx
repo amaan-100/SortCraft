@@ -4,10 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
-  Award,
-  BookOpen,
   CheckCircle2,
-  Key,
   Loader2,
   Play,
   Sparkles,
@@ -16,7 +13,8 @@ import { algorithms } from "@/algorithms";
 import { badges as allBadges } from "@/data/badges";
 import { getLevel, levels } from "@/data/levels";
 import { Button } from "@/components/ui/Button";
-import { Card, CardHeader } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
+import { Panel } from "@/components/ui/Panel";
 import { Quiz, type QuizResult } from "@/components/quiz/Quiz";
 import { ComplexityCard } from "@/components/visualizer/ComplexityCard";
 import { AuthPrompt } from "@/components/auth/AuthPrompt";
@@ -25,6 +23,7 @@ import { useProgress } from "@/context/ProgressContext";
 import { useAuth } from "@/context/AuthContext";
 import { useQuizAttempts } from "@/hooks/useQuizAttempts";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { cn } from "@/utils/cn";
 
 export default function LevelDetailPage() {
   const { levelId } = useParams();
@@ -127,68 +126,49 @@ export default function LevelDetailPage() {
     <div className="mx-auto w-full min-w-0 max-w-5xl px-4 py-8 sm:px-6">
       <Link
         to="/levels"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm text-ink transition-colors hover:text-fg"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to the learning path
       </Link>
 
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
+        <p className="overline text-muted">
           Level {level.id} · {level.xpReward} XP
-          {isLevelCompleted(level.id) && " · completed"}
+          {isLevelCompleted(level.id) && (
+            <span className="ml-1 text-emerald-500">· completed</span>
+          )}
         </p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
           {level.title}
         </h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-          {level.subtitle}
-        </p>
+        <p className="mt-1 text-sm text-ink">{level.subtitle}</p>
       </header>
 
       <div className="grid min-w-0 gap-6 lg:grid-cols-3">
         <div className="min-w-0 space-y-6 lg:col-span-2">
-          <Card>
-            <CardHeader
-              title="Lesson"
-              icon={<BookOpen className="h-4 w-4 text-brand-600 dark:text-brand-400" />}
-            />
-            <div className="space-y-4 p-4">
-              {level.lesson.map((paragraph, i) => (
-                <p
-                  key={i}
-                  className="text-sm leading-relaxed text-slate-700 dark:text-slate-300"
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </Card>
+          <Panel dots={false} title="LESSON" bodyClassName="space-y-4 p-4">
+            {level.lesson.map((paragraph, i) => (
+              <p key={i} className="text-sm leading-relaxed text-ink">
+                {paragraph}
+              </p>
+            ))}
+          </Panel>
 
           {algo && <ComplexityCard algorithm={algo} />}
 
-          <Card className="min-w-0">
-            <CardHeader
-              title="Test yourself"
-              icon={<Award className="h-4 w-4 text-brand-600 dark:text-brand-400" />}
-            />
-            <div className="p-4">
-              {requiresAuth ? (
-                <AuthPrompt redirectTo={`/levels/${level.id}`} />
-              ) : (
-                <Quiz
-                  key={quizKey}
-                  questions={level.quiz}
-                  onFinish={handleFinish}
-                />
-              )}
-            </div>
-          </Card>
+          <Panel dots={false} title="TEST YOURSELF" className="min-w-0">
+            {requiresAuth ? (
+              <AuthPrompt redirectTo={`/levels/${level.id}`} />
+            ) : (
+              <Quiz key={quizKey} questions={level.quiz} onFinish={handleFinish} />
+            )}
+          </Panel>
 
           {submitting && (
             <div
               role="status"
-              className="flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300"
+              className="flex items-center gap-2 rounded-md border border-brand-500/40 bg-brand-500/10 px-4 py-3 text-sm text-brand-700 dark:text-brand-300"
             >
               <Loader2 className="h-4 w-4 animate-spin" />
               Verifying and saving your quiz attempt…
@@ -209,14 +189,14 @@ export default function LevelDetailPage() {
               animate={{ opacity: 1, y: 0 }}
             >
               <Card
-                className={
+                className={cn(
                   outcome.passed
-                    ? "border-emerald-400 dark:border-emerald-500/50"
-                    : "border-amber-400 dark:border-amber-500/50"
-                }
+                    ? "border-emerald-500/60"
+                    : "border-amber-500/60"
+                )}
               >
                 <div className="p-4">
-                  <h2 className="flex items-center gap-2 text-sm font-semibold">
+                  <h2 className="flex items-center gap-2 text-sm font-semibold text-fg">
                     {outcome.saved && outcome.passed ? (
                       <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                     ) : (
@@ -226,20 +206,18 @@ export default function LevelDetailPage() {
                       ? `Quiz preview scored ${outcome.score}`
                       : outcome.passed
                         ? `Level ${level.id} complete — scored ${outcome.score}`
-                      : `Scored ${outcome.score} — not quite yet`}
+                        : `Scored ${outcome.score} — not quite yet`}
                   </h2>
                   {outcome.error && (
-                    <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
-                      {outcome.error}
-                    </p>
+                    <p className="mt-1 text-sm text-amber-500">{outcome.error}</p>
                   )}
                   {outcome.saved && outcome.xp > 0 && (
-                    <p className="mt-1 text-sm text-emerald-600 dark:text-emerald-400">
+                    <p className="mt-1 text-sm font-mono text-emerald-500">
                       +{outcome.xp} XP earned and saved.
                     </p>
                   )}
                   {outcome.newBadges.length > 0 && (
-                    <p className="mt-1 text-sm text-violet-600 dark:text-violet-400">
+                    <p className="mt-1 text-sm text-violet-500">
                       New badge
                       {outcome.newBadges.length > 1 ? "s" : ""}:{" "}
                       {outcome.newBadges
@@ -270,12 +248,8 @@ export default function LevelDetailPage() {
         </div>
 
         <aside className="space-y-6">
-          <Card>
-            <CardHeader
-              title="Key points"
-              icon={<Key className="h-4 w-4 text-brand-600 dark:text-brand-400" />}
-            />
-            <ul className="space-y-2 p-4 text-sm text-slate-700 dark:text-slate-300">
+          <Panel dots={false} title="KEY POINTS" bodyClassName="p-4">
+            <ul className="space-y-2 text-sm text-ink">
               {level.keyPoints.map((point) => (
                 <li key={point} className="flex items-start gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" />
@@ -283,11 +257,10 @@ export default function LevelDetailPage() {
                 </li>
               ))}
             </ul>
-          </Card>
+          </Panel>
 
-          <Card className="p-4">
-            <h2 className="text-sm font-semibold">Practise it</h2>
-            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+          <Panel dots={false} title="PRACTISE IT" bodyClassName="p-4">
+            <p className="text-xs leading-relaxed text-ink">
               {algo
                 ? `Step through ${algo.name} in the visualizer before taking the quiz.`
                 : "Race several algorithms on the same array to see this lesson in action."}
@@ -301,7 +274,7 @@ export default function LevelDetailPage() {
                 {algo ? `Open ${algo.name}` : "Open comparison lab"}
               </Button>
             </Link>
-          </Card>
+          </Panel>
         </aside>
       </div>
     </div>

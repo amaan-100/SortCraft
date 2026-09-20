@@ -48,62 +48,61 @@ export function QuizHistory({
       />
       <div className="p-4">
         {loading ? (
-          <p className="animate-pulse text-sm text-slate-400">
-            Loading your attempts…
-          </p>
+          <p className="animate-pulse text-sm text-muted">Loading your attempts…</p>
         ) : error ? (
-          <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-200">
+          <p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
             {error}
           </p>
         ) : attempts.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            No previous attempts yet.
-          </p>
+          <p className="text-sm text-muted">No previous attempts yet.</p>
         ) : (
           <ul className="space-y-2">
             {attempts.map((attempt) => {
               const isOpen = expanded === attempt.id;
               const review = enrichWithQuestions(attempt.answers, levelId);
               return (
-                <li key={attempt.id} className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
+                <li
+                  key={attempt.id}
+                  className="overflow-hidden rounded-md border border-line"
+                >
                   <button
                     onClick={() => setExpanded(isOpen ? null : attempt.id)}
                     aria-expanded={isOpen}
-                    className="flex w-full min-w-0 items-center justify-between gap-2 px-3 py-2.5 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    className="flex w-full min-w-0 items-center justify-between gap-2 px-3 py-2.5 text-left text-sm hover:bg-surface-2"
                   >
                     <span className="min-w-0">
                       <span
                         className={cn(
                           "block font-medium",
                           attempt.passed
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-slate-700 dark:text-slate-200"
+                            ? "text-emerald-500"
+                            : "text-fg"
                         )}
                       >
                         {resultMessage(attempt)}
                       </span>
-                      <span className="block truncate text-xs text-slate-500 dark:text-slate-500">
+                      <span className="block truncate text-xs text-muted">
                         {formatAttemptDate(attempt.createdAt)}
                       </span>
                     </span>
-                    <span className="shrink-0 text-xs text-slate-400">
+                    <span className="shrink-0 text-xs text-muted">
                       {isOpen ? "Hide" : "Review"}
                     </span>
                   </button>
 
                   {isOpen && (
-                    <ul className="space-y-3 border-t border-slate-200 px-3 py-3 dark:border-slate-800">
+                    <ul className="space-y-3 border-t border-line px-3 py-3">
                       {review.map((item, i) => (
                         <li key={item.questionId}>
-                          <p className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                          <p className="text-xs font-medium text-fg">
                             {i + 1}. {item.question?.prompt ?? item.questionId}
                           </p>
                           <p
                             className={cn(
                               "mt-1 flex items-center gap-1.5 text-xs",
                               item.correct
-                                ? "text-emerald-600 dark:text-emerald-400"
-                                : "text-rose-600 dark:text-rose-400"
+                                ? "text-emerald-500"
+                                : "text-rose-500"
                             )}
                           >
                             {item.correct ? (
@@ -121,7 +120,7 @@ export function QuizHistory({
                               </>
                             )}
                           </p>
-                          <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                          <p className="mt-1 text-xs leading-relaxed text-ink">
                             {item.explanation}
                           </p>
                         </li>
