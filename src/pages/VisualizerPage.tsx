@@ -1,6 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { isAlgorithmId } from "@/algorithms";
 import { useSortPlayer } from "@/hooks/useSortPlayer";
 import { Panel } from "@/components/ui/Panel";
 import { BarChart } from "@/components/visualizer/BarChart";
@@ -11,22 +10,63 @@ import { Controls } from "@/components/visualizer/Controls";
 import { ExplanationPanel } from "@/components/visualizer/ExplanationPanel";
 import { Legend } from "@/components/visualizer/Legend";
 import { StatsBar } from "@/components/visualizer/StatsBar";
+import { presetArray, type ArrayPresetId } from "@/utils/array";
+import {
+  parseVisualizerUrl,
+  type VisualizerUrlConfig,
+} from "@/utils/visualizerUrl";
 
 export default function VisualizerPage() {
-  const [searchParams] = useSearchParams();
-  const requested = searchParams.get("algo");
-  const initialAlgorithm = requested && isAlgorithmId(requested) ? requested : "bubble";
-  const player = useSortPlayer(24, initialAlgorithm);
-  const lastRequested = useRef(initialAlgorithm);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Follow deep links such as /visualizer?algo=merge coming from a level page.
+  // Stable string form of the query so effects re-run only on real URL changes.
+  const paramsStr = useMemo(() => searchParams.toString(), [searchParams]);
+  const urlConfig = useMemo(
+    () => parseVisualizerUrl(new URLSearchParams(paramsStr)),
+    [paramsStr]
+  );
+  const initialAlgorithm = urlConfig.algo ?? "bubble";
+  const player = useSortPlayer(24, initialAlgorithm);
+
+  // The input shape the player currently holds, as reported by ConfigPanel.
+  const playerShapeRef = useRef<ArrayPresetId | null>(null);
+
+  // Follow the URL: pick up the fields it carries and leave anything else alone.
+  // The array is rebuilt only when the incoming shape or size actually differs,
+  // so a round-trip sync of our own changes never resets the current array.
   useEffect(() => {
-    if (requested && isAlgorithmId(requested) && requested !== lastRequested.current) {
-      lastRequested.current = requested;
-      player.changeAlgorithm(requested);
+    if (urlConfig.algo && urlConfig.algo !== player.algorithmId) {
+      player.changeAlgorithm(urlConfig.algo);
+    }
+    if (urlConfig.order && urlConfig.order !== player.order) {
+      player.changeOrder(urlConfig.order);
+    }
+    if (urlConfig.n !== undefined || urlConfig.shape !== undefined) {
+      const shape = urlConfig.shape ?? playerShapeRef.current ?? "random";
+      const sizeMismatch =
+        urlConfig.n !== undefined && urlConfig.n !== player.baseArray.length;
+      if (sizeMismatch || shape !== playerShapeRef.current) {
+        player.applyCustomArray(
+          presetArray(urlConfig.n ?? player.baseArray.length, shape)
+        );
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requested, player]);
+  }, [paramsStr]);
+
+  // Push the current shareable configuration back into the URL.
+  const syncUrl = useCallback(
+    (config: VisualizerUrlConfig) => {
+      playerShapeRef.current = config.shape ?? "random";
+      const next = new URLSearchParams();
+      if (config.algo) next.set("algo", config.algo);
+      if (config.order) next.set("order", config.order);
+      if (config.n !== undefined) next.set("n", String(config.n));
+      if (config.shape) next.set("shape", config.shape);
+      setSearchParams(next, { replace: true });
+    },
+    [setSearchParams]
+  );
 
   const {
     algorithm,
@@ -113,7 +153,11 @@ export default function VisualizerPage() {
 
       {/* Instrument deck — below the stage */}
       <div className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <ConfigPanel player={player} />
+        <ConfigPanel
+          player={player}
+          urlShape={urlConfig.shape}
+          onConfigChange={syncUrl}
+        />
         <ComplexityCard algorithm={algorithm} />
       </div>
     </div>

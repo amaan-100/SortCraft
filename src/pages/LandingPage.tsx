@@ -180,7 +180,10 @@ export default function LandingPage() {
                       <Complexity value={algo.complexity.worst} size="xs" />
                     </span>
                   </div>
-                  <Link to="/visualizer" className="justify-self-start lg:justify-self-end">
+                  <Link
+                    to={`/visualizer?algo=${algo.id}`}
+                    className="justify-self-start lg:justify-self-end"
+                  >
                     <Button variant="outline" size="sm">
                       Visualize
                       <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

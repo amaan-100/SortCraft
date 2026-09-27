@@ -89,7 +89,7 @@ export default function SignUpPage() {
         <Input
           label="Display name"
           name="displayName"
-          placeholder="Ada Lovelace"
+          placeholder="John Doe"
           maxLength={DISPLAY_NAME_MAX}
           hint="This is the name shown in the header and on your dashboard."
           value={displayName}
@@ -98,7 +98,7 @@ export default function SignUpPage() {
         <Input
           label="Username"
           name="username"
-          placeholder="ada_l"
+          placeholder="john_doe"
           hint="3–20 characters, letters, numbers or underscores."
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -108,7 +108,7 @@ export default function SignUpPage() {
           name="email"
           type="email"
           autoComplete="email"
-          placeholder="you@university.edu"
+          placeholder="john@university.edu"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />

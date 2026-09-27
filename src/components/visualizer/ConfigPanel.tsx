@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowDownNarrowWide, ArrowUpNarrowWide } from "lucide-react";
 import { algorithmList } from "@/algorithms";
 import type { AlgorithmId, SortOrder } from "@/algorithms/types";
@@ -17,9 +17,18 @@ import {
   presetArray,
   type ArrayPresetId,
 } from "@/utils/array";
+import type { VisualizerUrlConfig } from "@/utils/visualizerUrl";
 import { cn } from "@/utils/cn";
 
-export function ConfigPanel({ player }: { player: SortPlayer }) {
+export function ConfigPanel({
+  player,
+  urlShape,
+  onConfigChange,
+}: {
+  player: SortPlayer;
+  urlShape?: ArrayPresetId;
+  onConfigChange?: (config: VisualizerUrlConfig) => void;
+}) {
   const {
     algorithmId,
     changeAlgorithm,
@@ -32,7 +41,7 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
   } = player;
 
   const [size, setSize] = useState(baseArray.length);
-  const [preset, setPreset] = useState<ArrayPresetId>("random");
+  const [preset, setPreset] = useState<ArrayPresetId>(urlShape ?? "random");
   const [customText, setCustomText] = useState(() => formatArray(baseArray));
   const [customError, setCustomError] = useState<string | null>(null);
   const [customSuccess, setCustomSuccess] = useState<string | null>(null);
@@ -41,6 +50,29 @@ export function ConfigPanel({ player }: { player: SortPlayer }) {
     setSize(baseArray.length);
     setCustomText(formatArray(baseArray));
   }, [baseArray]);
+
+  // Keep the active shape in sync when a shared URL changes it.
+  useEffect(() => {
+    if (urlShape) setPreset(urlShape);
+  }, [urlShape]);
+
+  // Report the shareable config so the URL stays in sync. Only fires when a
+  // URL-relevant field actually changes; custom arrays with identical length
+  // and shape don't trigger a rewrite.
+  const lastReportedRef = useRef(
+    `${algorithmId}|${order}|${baseArray.length}|${preset}`
+  );
+  useEffect(() => {
+    const key = `${algorithmId}|${order}|${baseArray.length}|${preset}`;
+    if (lastReportedRef.current === key) return;
+    lastReportedRef.current = key;
+    onConfigChange?.({
+      algo: algorithmId,
+      order,
+      n: baseArray.length,
+      shape: preset,
+    });
+  }, [algorithmId, order, baseArray, preset, onConfigChange]);
 
   const handleSize = (value: number) => {
     setSize(value);
